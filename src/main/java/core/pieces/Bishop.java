@@ -1,6 +1,11 @@
 package core.pieces;
 
 import core.Piece;
+import core.Square;
+import util.PieceMovementHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Bishop extends Piece {
     public Bishop(boolean white) {
@@ -10,5 +15,10 @@ public class Bishop extends Piece {
     @Override
     public String getDisplay() {
         return isWhite() ? "B" : "b";
+    }
+
+    @Override
+    public List<Move> getLegalMovesForPiece(Square[][] squares, Square startSquare) {
+        return new ArrayList<>(PieceMovementHelper.getDiagonalMoves(squares, startSquare, isWhite()));
     }
 }

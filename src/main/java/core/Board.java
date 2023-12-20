@@ -1,6 +1,10 @@
 package core;
 
 import lombok.Data;
+import util.ChessNotationHandler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class Board {
@@ -10,7 +14,7 @@ public class Board {
         squares = new Square[8][8];
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                squares[i][j] = new Square(false);
+                squares[i][j] = new Square(false, i, j);
             }
         }
     }
@@ -30,5 +34,30 @@ public class Board {
             return square.getPiece();
         }
         return null;
+    }
+
+    public Square getSquareFromChessSquare(String chessSquare) {
+        if (chessSquare.length() != 2) {
+            return null;
+        }
+        int rank = 8 - Character.getNumericValue(chessSquare.charAt(1));
+        int file = ChessNotationHandler.getFileFromChessFile(chessSquare.charAt(0));
+        if (file == -1 || rank >= 8) {
+            return null;
+        }
+        return squares[rank][file];
+    }
+
+    public List<Square> getPositionOfPiecesByType(String type) {
+        List<Square> positions = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                var piece = getPieceFromSquare(i, j);
+                if (piece != null && piece.getDisplay().equals(type)) {
+                    positions.add(squares[i][j]);
+                }
+            }
+        }
+        return positions;
     }
 }

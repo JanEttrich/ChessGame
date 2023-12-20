@@ -4,6 +4,8 @@ import core.pieces.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 public abstract class Piece {
@@ -28,4 +30,6 @@ public abstract class Piece {
             default -> null;
         };
     }
+
+    public abstract List<Move> getLegalMovesForPiece(Square[][] squares, Square startSquare);
 }

@@ -1,6 +1,11 @@
 package core.pieces;
 
 import core.Piece;
+import core.Square;
+import util.PieceMovementHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Rook extends Piece {
 
@@ -11,5 +16,10 @@ public class Rook extends Piece {
     @Override
     public String getDisplay() {
         return isWhite() ? "R" : "r";
+    }
+
+    @Override
+    public List<Move> getLegalMovesForPiece(Square[][] squares, Square startSquare) {
+        return new ArrayList<>(PieceMovementHelper.getStraightMoves(squares, startSquare, isWhite()));
     }
 }
