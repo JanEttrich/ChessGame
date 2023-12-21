@@ -4,6 +4,8 @@ import core.pieces.Move;
 import lombok.Getter;
 import util.FenStringReader;
 
+import java.util.Scanner;
+
 @Getter
 public class Game {
 
@@ -12,6 +14,28 @@ public class Game {
 
     public Game() {
         this.board = new Board();
+    }
+
+    public void startGame() {
+        initStartingPosition();
+        printBoard();
+        // Player playerWhite = new Player(true, true, true, true);
+        // Player playerBlack = new Player(false, true, true, true);
+        Scanner scanner = new Scanner(System.in);
+        boolean whiteOneMove = true;
+        while (true) {
+            System.out.print("Move" + (whiteOneMove ? "(white)" : "(black)") + ": ");
+            String move = scanner.next();
+            if (move.equals("quit")) {
+                break;
+            }
+            if (handleMove(move, whiteOneMove)) {
+                whiteOneMove = !whiteOneMove;
+            }
+            printBoard();
+
+        }
+
     }
 
     public void initStartingPosition() {
@@ -41,37 +65,35 @@ public class Game {
 
     // move = Se4-d6
     public boolean handleMove(String move, boolean white) {
-        if (move.length() != 6 && move.length() != 5) {
+        if (move.length() != 2 && move.length() != 3) {
             return false;
         }
 
-        if (move.length() == 5) {
+        if (move.length() == 2) {
             String pawn = white ? "P" : "p";
             move = pawn + move;
         }
 
-        // get source square
-        var sourceSquare = board.getSquareFromChessSquare(move.substring(1, 3));
-
         // get target square
-        var targetSquare = board.getSquareFromChessSquare(move.substring(4, 6));
+        var targetSquare = board.getSquareFromChessSquare(move.substring(1, 3));
 
-        // get piece to be moved
+        // find piece of correct type on board
         String pieceString = move.substring(0, 1);
-        if (!sourceSquare.isOccupied() || !sourceSquare.getPiece().getDisplay().equals(pieceString)) {
-            return false;
-        }
-        var piece = sourceSquare.getPiece();
+        var squaresWithPiece = board.getPositionOfPiecesByType(pieceString, white);
+        for (Square sourceSquare : squaresWithPiece) {
+            Piece piece = sourceSquare.getPiece();
 
-        // check if move is legal
-        var legalMoves = piece.getLegalMovesForPiece(board.getSquares(), sourceSquare);
-        System.out.println(legalMoves);
-        for (Move legalMove : legalMoves) {
-            if (legalMove.getStartSquare() == sourceSquare && legalMove.getEndSquare() == targetSquare) {
-                // move piece
-                sourceSquare.clearSquare();
-                targetSquare.placePiece(piece);
-                return true;
+            var legalMoves = piece.getLegalMovesForPiece(board.getSquares(), sourceSquare);
+            System.out.println(legalMoves);
+
+            // check if move to target square from this piece is legal
+            for (Move legalMove : legalMoves) {
+                if (legalMove.getStartSquare() == sourceSquare && legalMove.getEndSquare() == targetSquare) {
+                    // move piece
+                    sourceSquare.clearSquare();
+                    targetSquare.placePiece(piece);
+                    return true;
+                }
             }
         }
 

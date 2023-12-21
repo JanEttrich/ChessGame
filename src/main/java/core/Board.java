@@ -48,12 +48,12 @@ public class Board {
         return squares[rank][file];
     }
 
-    public List<Square> getPositionOfPiecesByType(String type) {
+    public List<Square> getPositionOfPiecesByType(String type, boolean white) {
         List<Square> positions = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 var piece = getPieceFromSquare(i, j);
-                if (piece != null && piece.getDisplay().equals(type)) {
+                if (piece != null && piece.isWhite() == white && piece.getDisplay().equalsIgnoreCase(type)) {
                     positions.add(squares[i][j]);
                 }
             }
