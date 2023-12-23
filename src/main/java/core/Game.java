@@ -4,12 +4,15 @@ import core.pieces.Move;
 import lombok.Getter;
 import util.FenStringReader;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 @Getter
 public class Game {
 
     private final Board board;
+    private List<String> moves;
     private static final String START_POS_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
     public Game() {
@@ -18,6 +21,7 @@ public class Game {
 
     public void startGame() {
         initStartingPosition();
+        moves = new ArrayList<>();
         printBoard();
         // Player playerWhite = new Player(true, true, true, true);
         // Player playerBlack = new Player(false, true, true, true);
@@ -32,6 +36,7 @@ public class Game {
             if (handleMove(move, whiteOneMove)) {
                 whiteOneMove = !whiteOneMove;
             }
+            moves.add(move);
             printBoard();
 
         }
@@ -65,11 +70,13 @@ public class Game {
 
     // move = Se4-d6
     public boolean handleMove(String move, boolean white) {
-        if (move.length() != 2 && move.length() != 3) {
+        if (move.length() != 2 && move.length() != 3 && move.length() != 4) {
             return false;
         }
 
-        if (move.length() == 2) {
+        String promotionPiece = move.length() == 4 ? move.substring(3, 4) : null;
+
+        if (move.length() == 2 || move.length() == 4) {
             String pawn = white ? "P" : "p";
             move = pawn + move;
         }
@@ -89,9 +96,20 @@ public class Game {
             // check if move to target square from this piece is legal
             for (Move legalMove : legalMoves) {
                 if (legalMove.getStartSquare() == sourceSquare && legalMove.getEndSquare() == targetSquare) {
+                    // handle promotion
+                    if (Boolean.TRUE.equals(legalMove.getPromotion())) {
+                        if (legalMove.getPromotionPiece().getDisplay().equalsIgnoreCase(promotionPiece)) {
+                            sourceSquare.clearSquare();
+                            targetSquare.placePiece(legalMove.getPromotionPiece());
+                            return true;
+                        } else {
+                            continue;
+                        }
+                    }
                     // move piece
                     sourceSquare.clearSquare();
                     targetSquare.placePiece(piece);
+
                     return true;
                 }
             }
