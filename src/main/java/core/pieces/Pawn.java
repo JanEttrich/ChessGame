@@ -66,10 +66,12 @@ public class Pawn extends Piece {
         if (startRank == enPassantMoveStart) {
             // check left and right en passant
             if (checkEnPassant(squares, startRank, startFile, direction, 1, enPassantMoveStart)) {
-                moves.add(new Move(squares[startRank][startFile], squares[startRank + direction][startFile + 1], true, squares[startRank][startFile + 1]));
+                moves.add(new Move(squares[startRank][startFile], squares[startRank + direction][startFile + 1],
+                        true, squares[startRank][startFile + 1]));
             }
             if (checkEnPassant(squares, startRank, startFile, direction, -1, enPassantMoveStart)) {
-                moves.add(new Move(squares[startRank][startFile], squares[startRank + direction][startFile - 1], true, squares[startRank][startFile - 1]));
+                moves.add(new Move(squares[startRank][startFile], squares[startRank + direction][startFile - 1],
+                        true, squares[startRank][startFile - 1]));
             }
         }
         return moves;
@@ -85,10 +87,14 @@ public class Pawn extends Piece {
         int startFile = startSquare.getFile();
 
         var moves = new ArrayList<Move>();
-        moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset], true, new Queen(isWhite())));
-        moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset], true, new Rook(isWhite())));
-        moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset], true, new Bishop(isWhite())));
-        moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset], true, new Knight(isWhite())));
+        moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset],
+                true, new Queen(isWhite())));
+        moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset],
+                true, new Rook(isWhite())));
+        moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset],
+                true, new Bishop(isWhite())));
+        moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset],
+                true, new Knight(isWhite())));
 
         return moves;
     }
@@ -99,7 +105,8 @@ public class Pawn extends Piece {
         }
         // check if the enemy pawn was moved by two squares in the last move
         Move lastMove = MoveTracker.getLastMove();
-        if (!lastMove.getEndSquare().equals(squares[startRank][startFile + fileDirection]) || lastMove.getStartSquare().getRank() != enPassantMoveStart + 2 * rankDirection) {
+        if (!lastMove.getEndSquare().equals(squares[startRank][startFile + fileDirection]) ||
+                lastMove.getStartSquare().getRank() != enPassantMoveStart + 2 * rankDirection) {
             return false;
         }
 

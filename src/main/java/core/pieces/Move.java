@@ -41,7 +41,8 @@ public class Move {
 
     @Override
     public String toString() {
-        String move = "[" + startSquare.getPiece().getDisplay() + startSquare.toChessSquare() + "-" + endSquare.toChessSquare();
+        String move = "[" + startSquare.getPiece().getDisplay() + startSquare.toChessSquare() + "-" +
+                endSquare.toChessSquare();
         if (Boolean.TRUE.equals(promotion)) {
             move += "=" + promotionPiece.getDisplay().toUpperCase();
         }
