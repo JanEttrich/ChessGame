@@ -2,6 +2,7 @@ package core.pieces;
 
 import core.Piece;
 import core.Square;
+import util.MoveTracker;
 import util.PieceMovementHelper;
 
 import java.util.ArrayList;
@@ -19,8 +20,6 @@ public class Pawn extends Piece {
 
     @Override
     public List<Move> getLegalMovesForPiece(Square[][] squares, Square startSquare) {
-        // TODO: en passant
-
         var moves = new ArrayList<Move>();
         int startRank = startSquare.getRank();
         int startFile = startSquare.getFile();
@@ -28,6 +27,7 @@ public class Pawn extends Piece {
         int direction = isWhite() ? -1 : 1;
         int doubleMoveStart = isWhite() ? 6 : 1;
         int promotionMoveStart = isWhite() ? 1 : 6;
+        int enPassantMoveStart = isWhite() ? 3 : 4;
 
         // one-step move (and promotion)
         if (!squares[startRank + direction][startFile].isOccupied()) {
@@ -62,6 +62,16 @@ public class Pawn extends Piece {
             }
         }
 
+        // en passant
+        if (startRank == enPassantMoveStart) {
+            // check left and right en passant
+            if (checkEnPassant(squares, startRank, startFile, direction, 1, enPassantMoveStart)) {
+                moves.add(new Move(squares[startRank][startFile], squares[startRank + direction][startFile + 1], true, squares[startRank][startFile + 1]));
+            }
+            if (checkEnPassant(squares, startRank, startFile, direction, -1, enPassantMoveStart)) {
+                moves.add(new Move(squares[startRank][startFile], squares[startRank + direction][startFile - 1], true, squares[startRank][startFile - 1]));
+            }
+        }
         return moves;
     }
 
@@ -81,5 +91,25 @@ public class Pawn extends Piece {
         moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset], true, new Knight(isWhite())));
 
         return moves;
+    }
+
+    private boolean checkEnPassant(Square[][] squares, int startRank, int startFile, int rankDirection, int fileDirection, int enPassantMoveStart) {
+        if (!hasAdjacentPawn(squares, startRank, startFile, fileDirection)) {
+            return false;
+        }
+        // check if the enemy pawn was moved by two squares in the last move
+        Move lastMove = MoveTracker.getLastMove();
+        if (!lastMove.getEndSquare().equals(squares[startRank][startFile + fileDirection]) || lastMove.getStartSquare().getRank() != enPassantMoveStart + 2 * rankDirection) {
+            return false;
+        }
+
+        // check if the target square is empty
+        return !squares[startRank + rankDirection][startFile + 1].isOccupied();
+    }
+
+    private boolean hasAdjacentPawn(Square[][] squares, int startRank, int startFile, int fileDirection) {
+        return PieceMovementHelper.checkIfSquareOnBoard(startRank, startFile + fileDirection) &&
+                checkPawnCapture(squares, startRank, startFile, 0, fileDirection) &&
+                squares[startRank][startFile + fileDirection].getPiece() instanceof Pawn;
     }
 }

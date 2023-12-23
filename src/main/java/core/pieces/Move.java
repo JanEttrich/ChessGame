@@ -17,6 +17,9 @@ public class Move {
     private Boolean castleShort;
     private Boolean castleLong;
 
+    private Boolean enPassant;
+    private Square enPassantSquare;
+
     public Move(Square startSquare, Square endSquare) {
         this.startSquare = startSquare;
         this.endSquare = endSquare;
@@ -27,6 +30,13 @@ public class Move {
         this.endSquare = endSquare;
         this.promotion = promotion;
         this.promotionPiece = promotionPiece;
+    }
+
+    public Move(Square startSquare, Square endSquare, Boolean enPassant, Square enPassantSquare) {
+        this.startSquare = startSquare;
+        this.endSquare = endSquare;
+        this.enPassant = enPassant;
+        this.enPassantSquare = enPassantSquare;
     }
 
     @Override

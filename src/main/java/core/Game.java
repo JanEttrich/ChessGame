@@ -3,16 +3,14 @@ package core;
 import core.pieces.Move;
 import lombok.Getter;
 import util.FenStringReader;
+import util.MoveTracker;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 @Getter
 public class Game {
 
     private final Board board;
-    private List<String> moves;
     private static final String START_POS_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
     public Game() {
@@ -21,8 +19,8 @@ public class Game {
 
     public void startGame() {
         initStartingPosition();
-        moves = new ArrayList<>();
         printBoard();
+        MoveTracker.resetMoves();
         // Player playerWhite = new Player(true, true, true, true);
         // Player playerBlack = new Player(false, true, true, true);
         Scanner scanner = new Scanner(System.in);
@@ -36,7 +34,6 @@ public class Game {
             if (handleMove(move, whiteOneMove)) {
                 whiteOneMove = !whiteOneMove;
             }
-            moves.add(move);
             printBoard();
 
         }
@@ -101,6 +98,7 @@ public class Game {
                         if (legalMove.getPromotionPiece().getDisplay().equalsIgnoreCase(promotionPiece)) {
                             sourceSquare.clearSquare();
                             targetSquare.placePiece(legalMove.getPromotionPiece());
+                            MoveTracker.addMove(legalMove);
                             return true;
                         } else {
                             continue;
@@ -110,6 +108,11 @@ public class Game {
                     sourceSquare.clearSquare();
                     targetSquare.placePiece(piece);
 
+                    // handle en passant
+                    if (Boolean.TRUE.equals(legalMove.getEnPassant()) && legalMove.getEnPassantSquare() != null) {
+                        legalMove.getEnPassantSquare().clearSquare();
+                    }
+                    MoveTracker.addMove(legalMove);
                     return true;
                 }
             }
