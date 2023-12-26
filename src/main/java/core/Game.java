@@ -2,6 +2,8 @@ package core;
 
 import core.pieces.Move;
 import lombok.Getter;
+import util.ChessMove;
+import util.Command;
 import util.FenStringReader;
 import util.MoveTracker;
 
@@ -10,8 +12,8 @@ import java.util.Scanner;
 @Getter
 public class Game {
 
-    private final Board board;
     private static final String START_POS_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+    private final Board board;
 
     public Game() {
         this.board = new Board();
@@ -21,23 +23,27 @@ public class Game {
         initStartingPosition();
         printBoard();
         MoveTracker.resetMoves();
-        // Player playerWhite = new Player(true, true, true, true);
-        // Player playerBlack = new Player(false, true, true, true);
+
         Scanner scanner = new Scanner(System.in);
-        boolean whiteOneMove = true;
+        boolean whiteToMove = true;
         while (true) {
-            System.out.print("Move" + (whiteOneMove ? "(white)" : "(black)") + ": ");
+            System.out.print("Move" + (whiteToMove ? "(white)" : "(black)") + ": ");
             String move = scanner.next();
             if (move.equals("quit")) {
                 break;
             }
-            if (handleMove(move, whiteOneMove)) {
-                whiteOneMove = !whiteOneMove;
+
+            for (Command command : Command.values()) {
+                if (move.matches(command.getPattern())) {
+                    ChessMove chessMove = command.handleInput(move);
+                    if (handleMove(chessMove, whiteToMove)) {
+                        whiteToMove = !whiteToMove;
+                    }
+                    break;
+                }
             }
             printBoard();
-
         }
-
     }
 
     public void initStartingPosition() {
@@ -65,24 +71,14 @@ public class Game {
         }
     }
 
-    // move = Se4-d6
-    public boolean handleMove(String move, boolean white) {
-        if (move.length() != 2 && move.length() != 3 && move.length() != 4) {
-            return false;
-        }
-
-        String promotionPiece = move.length() == 4 ? move.substring(3, 4) : null;
-
-        if (move.length() == 2 || move.length() == 4) {
-            String pawn = white ? "P" : "p";
-            move = pawn + move;
-        }
+    public boolean handleMove(ChessMove chessMove, boolean white) {
 
         // get target square
-        var targetSquare = board.getSquareFromChessSquare(move.substring(1, 3));
+        var targetSquare = board.getSquareFromChessSquare(chessMove.getEndSquare());
 
         // find piece of correct type on board
-        String pieceString = move.substring(0, 1);
+        String pieceString = chessMove.getPiece();
+
         var squaresWithPiece = board.getPositionOfPiecesByType(pieceString, white);
         for (Square sourceSquare : squaresWithPiece) {
             Piece piece = sourceSquare.getPiece();
@@ -95,7 +91,7 @@ public class Game {
                 if (legalMove.getStartSquare() == sourceSquare && legalMove.getEndSquare() == targetSquare) {
                     // handle promotion
                     if (Boolean.TRUE.equals(legalMove.getPromotion())) {
-                        if (legalMove.getPromotionPiece().getDisplay().equalsIgnoreCase(promotionPiece)) {
+                        if (legalMove.getPromotionPiece().getDisplay().equalsIgnoreCase(chessMove.getPromotionPiece())) {
                             sourceSquare.clearSquare();
                             targetSquare.placePiece(legalMove.getPromotionPiece());
                             MoveTracker.addMove(legalMove);
