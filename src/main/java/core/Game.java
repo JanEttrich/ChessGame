@@ -18,28 +18,44 @@ public class Game {
     private static final String START_POS_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
     @Getter
     private final Board board;
+    private final Player playerWhite;
+    private final Player playerBlack;
     private final Random random = new Random();
+    private Player activePlayer;
 
     public Game() {
         this.board = new Board();
+        this.playerWhite = new Player(true, true);
+        this.playerBlack = new Player(false, false);
+        this.activePlayer = playerWhite;
+    }
+
+    public void initStartingPosition() {
+        FenStringReader.read(START_POS_FEN, board);
+    }
+
+    public void initPositionFromFen(String fen) {
+        FenStringReader.read(fen, board);
     }
 
     public void startGame() {
         initStartingPosition();
         board.printBoard();
         MoveTracker.resetMoves();
-        Player playerWhite = new Player(true, true);
-        Player playerBlack = new Player(false, false);
-        Player activePlayer = playerWhite;
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
+            if (!canPlayerMove(activePlayer.isWhite())) {
+                if (checkIfKingCanBeCaptured(activePlayer.isWhite())) {
+                    System.out.println("Checkmate, " + (activePlayer.isWhite() ? "black" : "white") + " wins");
+                } else {
+                    System.out.println("Draw by Stalemate");
+                }
+                break;
+            }
             if (activePlayer.isHuman()) {
                 System.out.print("Move" + (activePlayer.isWhite() ? "(white)" : "(black)") + ": ");
                 String move = scanner.next();
-                if (move.equals("quit")) {
-                    break;
-                }
                 for (Command command : Command.values()) {
                     if (move.matches(command.getPattern())) {
                         ChessMove chessMove = command.handleInput(move);
@@ -49,23 +65,18 @@ public class Game {
                         break;
                     }
                 }
-
             } else {
                 var move = generateMove(activePlayer.isWhite());
+                System.out.println("Move" + (activePlayer.isWhite() ? "(white)" : "(black)") + ": " + move);
                 MoveMaker.makeMove(move);
                 activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
                 board.printBoard();
             }
-            printBoard();
         }
     }
 
-    public void initStartingPosition() {
-        FenStringReader.read(START_POS_FEN, board);
-    }
-
-    public void initPositionFromFen(String fen) {
-        FenStringReader.read(fen, board);
+    private boolean canPlayerMove(boolean white) {
+        return !generate(white).isEmpty();
     }
 
     public boolean handleChessMove(ChessMove chessMove, boolean white) {
@@ -107,9 +118,14 @@ public class Game {
 
     }
 
-    public Move generateMove(boolean white) {
+    // Returns all legal moves of a player
+    public List<Move> generate(boolean white) {
         List<Move> pseudoLegalMoves = generatePseudoLegalMoves(white);
-        List<Move> legalMoves = filterMoves(pseudoLegalMoves, white);
+        return filterMoves(pseudoLegalMoves, white);
+    }
+
+    public Move generateMove(boolean white) {
+        List<Move> legalMoves = generate(white);
 
         int randomIndex = random.nextInt(legalMoves.size());
         return legalMoves.get(randomIndex);
