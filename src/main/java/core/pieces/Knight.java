@@ -18,7 +18,7 @@ public class Knight extends Piece {
     }
 
     @Override
-    public List<Move> getLegalMovesForPiece(Square[][] squares, Square startSquare) {
+    public List<Move> getPseudoLegalMovesForPiece(Square[][] squares, Square startSquare) {
         var moves = new ArrayList<Move>();
         int startRank = startSquare.getRank();
         int startFile = startSquare.getFile();

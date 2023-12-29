@@ -60,4 +60,17 @@ public class Board {
         }
         return positions;
     }
+
+    public List<Square> getAllPiecePositionsOfPlayer(boolean white) {
+        List<Square> positions = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                var piece = getPieceFromSquare(i, j);
+                if (piece != null && piece.isWhite() == white) {
+                    positions.add(squares[i][j]);
+                }
+            }
+        }
+        return positions;
+    }
 }

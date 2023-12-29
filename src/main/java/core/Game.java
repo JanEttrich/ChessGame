@@ -2,18 +2,19 @@ package core;
 
 import core.pieces.Move;
 import lombok.Getter;
-import util.ChessMove;
-import util.Command;
-import util.FenStringReader;
-import util.MoveTracker;
+import util.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
-@Getter
 public class Game {
 
     private static final String START_POS_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+    @Getter
     private final Board board;
+    private Random random;
 
     public Game() {
         this.board = new Board();
@@ -36,7 +37,7 @@ public class Game {
             for (Command command : Command.values()) {
                 if (move.matches(command.getPattern())) {
                     ChessMove chessMove = command.handleInput(move);
-                    if (handleMove(chessMove, whiteToMove)) {
+                    if (handleChessMove(chessMove, whiteToMove)) {
                         whiteToMove = !whiteToMove;
                     }
                     break;
@@ -71,49 +72,85 @@ public class Game {
         }
     }
 
-    public boolean handleMove(ChessMove chessMove, boolean white) {
-
+    public boolean handleChessMove(ChessMove chessMove, boolean white) {
         // get target square
-        var targetSquare = board.getSquareFromChessSquare(chessMove.getEndSquare());
+        Square targetSquare = board.getSquareFromChessSquare(chessMove.getEndSquare());
 
         // find piece of correct type on board
         String pieceString = chessMove.getPiece();
 
-        var squaresWithPiece = board.getPositionOfPiecesByType(pieceString, white);
+        List<Square> squaresWithPiece = board.getPositionOfPiecesByType(pieceString, white);
         for (Square sourceSquare : squaresWithPiece) {
             Piece piece = sourceSquare.getPiece();
+            List<Move> pseudoLegalMovesForPiece = piece.getPseudoLegalMovesForPiece(board.getSquares(), sourceSquare);
 
-            var legalMoves = piece.getLegalMovesForPiece(board.getSquares(), sourceSquare);
-            System.out.println(legalMoves);
-
-            // check if move to target square from this piece is legal
-            for (Move legalMove : legalMoves) {
-                if (legalMove.getStartSquare() == sourceSquare && legalMove.getEndSquare() == targetSquare) {
-                    // handle promotion
-                    if (Boolean.TRUE.equals(legalMove.getPromotion())) {
-                        if (legalMove.getPromotionPiece().getDisplay().equalsIgnoreCase(chessMove.getPromotionPiece())) {
-                            sourceSquare.clearSquare();
-                            targetSquare.placePiece(legalMove.getPromotionPiece());
-                            MoveTracker.addMove(legalMove);
-                            return true;
-                        } else {
-                            continue;
-                        }
+            // match move input to legal move
+            for (Move move : pseudoLegalMovesForPiece) {
+                if (doesMoveMatchInput(move, sourceSquare, targetSquare, chessMove)) {
+                    MoveMaker.makeMove(move);
+                    if (checkIfKingCanBeCaptured(white)) {
+                        MoveMaker.unmakeMove(move);
+                        return false;
                     }
-                    // move piece
-                    sourceSquare.clearSquare();
-                    targetSquare.placePiece(piece);
-
-                    // handle en passant
-                    if (Boolean.TRUE.equals(legalMove.getEnPassant()) && legalMove.getEnPassantSquare() != null) {
-                        legalMove.getEnPassantSquare().clearSquare();
-                    }
-                    MoveTracker.addMove(legalMove);
                     return true;
                 }
             }
         }
-
         return false;
+    }
+
+    private boolean doesMoveMatchInput(Move move, Square sourceSquare, Square targetSquare, ChessMove chessMove) {
+        if (move.getStartSquare() == sourceSquare && move.getEndSquare() == targetSquare) {
+            if (chessMove.isPawnPromotion()) {
+                return Boolean.TRUE.equals(move.getPromotion()) &&
+                        move.getPromotionPiece().getDisplay().equalsIgnoreCase(chessMove.getPromotionPiece());
+            }
+            return true;
+        }
+        return false;
+
+    }
+
+    public Move generateMove(boolean white) {
+        List<Move> pseudoLegalMoves = generatePseudoLegalMoves(white);
+        List<Move> legalMoves = filterMoves(pseudoLegalMoves, white);
+
+        int randomIndex = random.nextInt(legalMoves.size());
+        return legalMoves.get(randomIndex);
+    }
+
+    private List<Move> filterMoves(List<Move> pseudoLegalMoves, boolean white) {
+        List<Move> legalMoves = new ArrayList<>();
+        for (Move move : pseudoLegalMoves) {
+            MoveMaker.makeMove(move);
+            if (!checkIfKingCanBeCaptured(white)) {
+                legalMoves.add(move);
+            }
+            MoveMaker.unmakeMove(move);
+        }
+        return legalMoves;
+    }
+
+    private boolean checkIfKingCanBeCaptured(boolean white) {
+        // get all possible moves of opponent
+        List<Move> pseudoLegalMoves = generatePseudoLegalMoves(!white);
+        for (Move move : pseudoLegalMoves) {
+            if (move.getEndSquare().isOccupied() && move.getEndSquare().getPiece().getDisplay().equalsIgnoreCase("K")) {
+                // if king can be captured directly, last move was illegal, regardless of if the capturing move is illegal
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<Move> generatePseudoLegalMoves(boolean white) {
+        // get pseudo-legal moves
+        List<Square> positions = board.getAllPiecePositionsOfPlayer(white);
+        List<Move> pseudoLegalMoves = new ArrayList<>();
+        for (Square sourceSquare : positions) {
+            pseudoLegalMoves.addAll(sourceSquare.getPiece().getPseudoLegalMovesForPiece(board.getSquares(),
+                    sourceSquare));
+        }
+        return pseudoLegalMoves;
     }
 }

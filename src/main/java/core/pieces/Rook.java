@@ -19,7 +19,7 @@ public class Rook extends Piece {
     }
 
     @Override
-    public List<Move> getLegalMovesForPiece(Square[][] squares, Square startSquare) {
+    public List<Move> getPseudoLegalMovesForPiece(Square[][] squares, Square startSquare) {
         return new ArrayList<>(PieceMovementHelper.getStraightMoves(squares, startSquare, isWhite()));
     }
 }

@@ -18,9 +18,9 @@ public class King extends Piece {
     }
 
     @Override
-    public List<Move> getLegalMovesForPiece(Square[][] squares, Square startSquare) {
-        // TODO: Check
+    public List<Move> getPseudoLegalMovesForPiece(Square[][] squares, Square startSquare) {
         // TODO: Castle
+        // TODO: Checkmate
         var moves = new ArrayList<Move>();
         int startRank = startSquare.getRank();
         int startFile = startSquare.getFile();

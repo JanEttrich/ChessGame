@@ -18,11 +18,11 @@ public class Queen extends Piece {
     }
 
     @Override
-    public List<Move> getLegalMovesForPiece(Square[][] squares, Square startSquare) {
+    public List<Move> getPseudoLegalMovesForPiece(Square[][] squares, Square startSquare) {
         var moves = new ArrayList<Move>();
         moves.addAll(PieceMovementHelper.getStraightMoves(squares, startSquare, isWhite()));
         moves.addAll(PieceMovementHelper.getDiagonalMoves(squares, startSquare, isWhite()));
-        
+
         return moves;
     }
 }

@@ -11,8 +11,6 @@ import java.util.List;
 public abstract class Piece {
     private boolean white;
 
-    public abstract String getDisplay();
-
     public static Piece getPieceForSymbol(char symbol) {
         return switch (symbol) {
             case 'R' -> new Rook(true);
@@ -31,5 +29,7 @@ public abstract class Piece {
         };
     }
 
-    public abstract List<Move> getLegalMovesForPiece(Square[][] squares, Square startSquare);
+    public abstract String getDisplay();
+
+    public abstract List<Move> getPseudoLegalMovesForPiece(Square[][] squares, Square startSquare);
 }
