@@ -1,6 +1,4 @@
-package util;
-
-import core.pieces.Move;
+package core.move;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package util;
+package core.input;
 
 import lombok.Getter;
 

@@ -1,8 +1,8 @@
 package core;
 
+import core.input.ChessNotationHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import util.ChessNotationHandler;
 
 @Data
 @AllArgsConstructor

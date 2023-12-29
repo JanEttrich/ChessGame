@@ -2,8 +2,9 @@ package core.pieces;
 
 import core.Piece;
 import core.Square;
-import util.MoveTracker;
-import util.PieceMovementHelper;
+import core.move.Move;
+import core.move.MoveTracker;
+import core.move.PieceMovementHelper;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package core.pieces;
+package core.move;
 
 import core.Piece;
 import core.Square;

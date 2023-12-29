@@ -1,7 +1,7 @@
 package core;
 
+import core.input.ChessNotationHandler;
 import lombok.Data;
-import util.ChessNotationHandler;
 
 import java.util.ArrayList;
 import java.util.List;

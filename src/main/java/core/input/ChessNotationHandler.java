@@ -1,4 +1,4 @@
-package util;
+package core.input;
 
 public class ChessNotationHandler {
     private ChessNotationHandler() {

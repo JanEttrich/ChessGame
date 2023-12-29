@@ -2,7 +2,8 @@ package core.pieces;
 
 import core.Piece;
 import core.Square;
-import util.PieceMovementHelper;
+import core.move.Move;
+import core.move.PieceMovementHelper;
 
 import java.util.ArrayList;
 import java.util.List;

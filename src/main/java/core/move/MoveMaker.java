@@ -1,7 +1,6 @@
-package util;
+package core.move;
 
 import core.Square;
-import core.pieces.Move;
 import core.pieces.Pawn;
 
 public class MoveMaker {

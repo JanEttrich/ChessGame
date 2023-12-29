@@ -1,8 +1,12 @@
 package core;
 
-import core.pieces.Move;
+import core.input.ChessMove;
+import core.input.Command;
+import core.move.Move;
+import core.move.MoveMaker;
+import core.move.MoveTracker;
 import lombok.Getter;
-import util.*;
+import util.FenStringReader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,24 +28,32 @@ public class Game {
         initStartingPosition();
         printBoard();
         MoveTracker.resetMoves();
+        Player playerWhite = new Player(true, true);
+        Player playerBlack = new Player(false, false);
+        Player activePlayer = playerWhite;
 
         Scanner scanner = new Scanner(System.in);
-        boolean whiteToMove = true;
         while (true) {
-            System.out.print("Move" + (whiteToMove ? "(white)" : "(black)") + ": ");
-            String move = scanner.next();
-            if (move.equals("quit")) {
-                break;
-            }
-
-            for (Command command : Command.values()) {
-                if (move.matches(command.getPattern())) {
-                    ChessMove chessMove = command.handleInput(move);
-                    if (handleChessMove(chessMove, whiteToMove)) {
-                        whiteToMove = !whiteToMove;
-                    }
+            if (activePlayer.isHuman()) {
+                System.out.print("Move" + (activePlayer.isWhite() ? "(white)" : "(black)") + ": ");
+                String move = scanner.next();
+                if (move.equals("quit")) {
                     break;
                 }
+                for (Command command : Command.values()) {
+                    if (move.matches(command.getPattern())) {
+                        ChessMove chessMove = command.handleInput(move);
+                        if (handleChessMove(chessMove, activePlayer.isWhite())) {
+                            activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
+                        }
+                        break;
+                    }
+                }
+
+            } else {
+                var move = generateMove(activePlayer.isWhite());
+                MoveMaker.makeMove(move);
+                activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
             }
             printBoard();
         }

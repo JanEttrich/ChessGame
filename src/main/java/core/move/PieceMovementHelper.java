@@ -1,7 +1,6 @@
-package util;
+package core.move;
 
 import core.Square;
-import core.pieces.Move;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -9,9 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 public class PieceMovementHelper {
-    private PieceMovementHelper() {
-    }
-
     public static final List<Map.Entry<Integer, Integer>> movementLShaped = new ArrayList<>();
 
     static {
@@ -23,6 +19,9 @@ public class PieceMovementHelper {
         movementLShaped.add(new AbstractMap.SimpleEntry<>(-2, 1));
         movementLShaped.add(new AbstractMap.SimpleEntry<>(-1, 2));
         movementLShaped.add(new AbstractMap.SimpleEntry<>(-1, -2));
+    }
+
+    private PieceMovementHelper() {
     }
 
     public static List<Move> getStraightMoves(Square[][] squares, Square startSquare, boolean white) {

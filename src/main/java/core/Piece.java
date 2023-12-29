@@ -1,5 +1,6 @@
 package core;
 
+import core.move.Move;
 import core.pieces.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
