@@ -8,6 +8,8 @@ import java.util.List;
 
 @Data
 public class Board {
+    private static final String PIECE_COLOR_BLACK = "\u001B[31m";
+    private static final String COLOR_RESET = "\u001B[0m";
     private Square[][] squares;
 
     public Board() {
@@ -16,6 +18,21 @@ public class Board {
             for (int j = 0; j < 8; j++) {
                 squares[i][j] = new Square(false, i, j);
             }
+        }
+    }
+
+    public void printBoard() {
+        for (Square[] squareRow : squares) {
+            for (int j = 0; j < squares[0].length; j++) {
+                if (squareRow[j].isOccupied()) {
+                    String piece = squareRow[j].getPiece().getDisplay();
+                    String color = Character.isUpperCase(piece.charAt(0)) ? "" : PIECE_COLOR_BLACK;
+                    System.out.print(color + squareRow[j].getPiece().getDisplay() + COLOR_RESET + " ");
+                } else {
+                    System.out.print("- ");
+                }
+            }
+            System.out.println();
         }
     }
 

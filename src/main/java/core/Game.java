@@ -26,7 +26,7 @@ public class Game {
 
     public void startGame() {
         initStartingPosition();
-        printBoard();
+        board.printBoard();
         MoveTracker.resetMoves();
         Player playerWhite = new Player(true, true);
         Player playerBlack = new Player(false, false);
@@ -54,6 +54,7 @@ public class Game {
                 var move = generateMove(activePlayer.isWhite());
                 MoveMaker.makeMove(move);
                 activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
+                board.printBoard();
             }
             printBoard();
         }
@@ -65,23 +66,6 @@ public class Game {
 
     public void initPositionFromFen(String fen) {
         FenStringReader.read(fen, board);
-    }
-
-    public Square getSquare(int rank, int file) {
-        return board.getSquares()[rank][file];
-    }
-
-    public void printBoard() {
-        for (int i = 0; i < board.getSquares().length; i++) {
-            for (int j = 0; j < board.getSquares()[0].length; j++) {
-                if (getSquare(i, j).isOccupied()) {
-                    System.out.print(getSquare(i, j).getPiece().getDisplay() + " ");
-                } else {
-                    System.out.print("- ");
-                }
-            }
-            System.out.println();
-        }
     }
 
     public boolean handleChessMove(ChessMove chessMove, boolean white) {
