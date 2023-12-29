@@ -14,7 +14,7 @@ public class Game {
     private static final String START_POS_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
     @Getter
     private final Board board;
-    private Random random;
+    private final Random random = new Random();
 
     public Game() {
         this.board = new Board();
