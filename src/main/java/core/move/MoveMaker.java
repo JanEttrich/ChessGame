@@ -51,7 +51,7 @@ public class MoveMaker {
 
         // handle en passant
         if (Boolean.TRUE.equals(move.getEnPassant()) && move.getEnPassantSquare() != null) {
-            move.getEnPassantSquare().placePiece(new Pawn(move.getPromotionPiece().isWhite()));
+            move.getEnPassantSquare().placePiece(new Pawn(!sourceSquare.getPiece().isWhite()));
         }
 
         MoveTracker.removeLastMove();
