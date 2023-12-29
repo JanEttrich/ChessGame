@@ -54,7 +54,7 @@ public class PieceMovementHelper {
         }
 
         // right
-        for (int file = startFile + 8; file < 8; file++) {
+        for (int file = startFile + 1; file < 8; file++) {
             var endSquare = squares[startRank][file];
             if (!processSingleMove(startSquare, endSquare, white, moves)) {
                 break;
