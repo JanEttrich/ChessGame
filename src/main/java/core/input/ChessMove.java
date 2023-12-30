@@ -41,6 +41,6 @@ public class ChessMove {
     }
 
     public static ChessMove getCastle(boolean castleShort) {
-        return new ChessMove(null, null, false, null, null, false, null, castleShort, !castleShort);
+        return new ChessMove("K", null, false, null, null, false, null, castleShort, !castleShort);
     }
 }

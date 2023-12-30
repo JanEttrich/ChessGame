@@ -14,8 +14,8 @@ public abstract class Piece {
 
     public static Piece getPieceForSymbol(char symbol) {
         return switch (symbol) {
-            case 'R' -> new Rook(true);
-            case 'r' -> new Rook(false);
+            case 'R' -> new Rook(true, false);
+            case 'r' -> new Rook(false, false);
             case 'N' -> new Knight(true);
             case 'n' -> new Knight(false);
             case 'B' -> new Bishop(true);

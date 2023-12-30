@@ -1,11 +1,36 @@
 package core;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
 public class Player {
     private boolean white;
     private boolean human;
+    private boolean castleShortAllowed;
+    private boolean castleLongAllowed;
+
+    public Player(boolean white, boolean human) {
+        this.white = white;
+        this.human = human;
+        castleShortAllowed = true;
+        castleLongAllowed = true;
+    }
+
+    public void disallowCastle() {
+        castleShortAllowed = false;
+        castleLongAllowed = false;
+    }
+
+    public void reAllowCastle() {
+        castleShortAllowed = true;
+        castleLongAllowed = true;
+    }
+
+    public boolean canCastleOnAtLeastOneSide() {
+        return castleShortAllowed || castleLongAllowed;
+    }
+
+    public boolean cannotCastleOnAtLeastOneSide() {
+        return castleShortAllowed && castleLongAllowed;
+    }
 }

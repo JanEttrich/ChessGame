@@ -48,6 +48,13 @@ public class Move {
         this.enPassantSquare = enPassantSquare;
     }
 
+    public Move(Square startSquare, Square endSquare, Boolean castleShort, Boolean castleLong) {
+        this.startSquare = startSquare;
+        this.endSquare = endSquare;
+        this.castleShort = castleShort;
+        this.castleLong = castleLong;
+    }
+
     @Override
     public String toString() {
         String move = "[" + startSquare.getPiece().getDisplay() + startSquare.toChessSquare() + "-" +

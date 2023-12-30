@@ -4,14 +4,24 @@ import core.Piece;
 import core.Square;
 import core.move.Move;
 import core.move.PieceMovementHelper;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = false)
 public class Rook extends Piece {
 
-    public Rook(boolean white) {
+    // field to track if a rook has moved, for castling rights
+    private boolean moved;
+
+    public Rook(boolean white, boolean moved) {
         super(white);
+        this.moved = moved;
     }
 
     @Override

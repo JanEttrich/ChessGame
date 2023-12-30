@@ -91,7 +91,7 @@ public class Pawn extends Piece {
         moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset],
                 true, new Queen(isWhite())));
         moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset],
-                true, new Rook(isWhite())));
+                true, new Rook(isWhite(), true)));
         moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset],
                 true, new Bishop(isWhite())));
         moves.add(new Move(startSquare, squares[startRank + direction][startFile + fileOffset],

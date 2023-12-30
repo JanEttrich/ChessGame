@@ -5,6 +5,8 @@ import core.input.Command;
 import core.move.Move;
 import core.move.MoveMaker;
 import core.move.MoveTracker;
+import core.pieces.King;
+import core.pieces.Rook;
 import lombok.Getter;
 import util.FenStringReader;
 
@@ -26,7 +28,7 @@ public class Game {
     public Game() {
         this.board = new Board();
         this.playerWhite = new Player(true, true);
-        this.playerBlack = new Player(false, false);
+        this.playerBlack = new Player(false, true);
         this.activePlayer = playerWhite;
     }
 
@@ -39,14 +41,16 @@ public class Game {
     }
 
     public void startGame() {
-        initStartingPosition();
+        //initStartingPosition();
+        initPositionFromFen("8/1k6/8/8/8/8/8/4K2R");
         board.printBoard();
+        GameState.resetGameState(playerWhite, playerBlack);
         MoveTracker.resetMoves();
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
             if (!canPlayerMove(activePlayer.isWhite())) {
-                if (checkIfKingCanBeCaptured(activePlayer.isWhite())) {
+                if (canKingCanBeCaptured(activePlayer.isWhite())) {
                     System.out.println("Checkmate, " + (activePlayer.isWhite() ? "black" : "white") + " wins");
                 } else {
                     System.out.println("Draw by Stalemate");
@@ -65,10 +69,12 @@ public class Game {
                         break;
                     }
                 }
+                board.printBoard();
             } else {
                 var move = generateMove(activePlayer.isWhite());
                 System.out.println("Move" + (activePlayer.isWhite() ? "(white)" : "(black)") + ": " + move);
-                MoveMaker.makeMove(move);
+                MoveMaker.makeMove(move, activePlayer, board);
+                updateCastlingRights(move.getEndSquare().getPiece(), move.getStartSquare());
                 activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
                 board.printBoard();
             }
@@ -81,7 +87,12 @@ public class Game {
 
     public boolean handleChessMove(ChessMove chessMove, boolean white) {
         // get target square
-        Square targetSquare = board.getSquareFromChessSquare(chessMove.getEndSquare());
+        Square targetSquare;
+        if (chessMove.isCastleShort() || chessMove.isCastleLong()) {
+            targetSquare = getTargetSquareForCastling(chessMove);
+        } else {
+            targetSquare = board.getSquareFromChessSquare(chessMove.getEndSquare());
+        }
 
         // find piece of correct type on board
         String pieceString = chessMove.getPiece();
@@ -94,19 +105,42 @@ public class Game {
             // match move input to legal move
             for (Move move : pseudoLegalMovesForPiece) {
                 if (doesMoveMatchInput(move, sourceSquare, targetSquare, chessMove)) {
-                    MoveMaker.makeMove(move);
-                    if (checkIfKingCanBeCaptured(white)) {
-                        MoveMaker.unmakeMove(move);
+                    if ((Boolean.TRUE.equals(move.getCastleShort()) || Boolean.TRUE.equals(move.getCastleLong())) &&
+                            threatenedOrCastlesThroughCheck(move)) {
                         return false;
                     }
+                    MoveMaker.makeMove(move, activePlayer, board);
+                    if (canKingCanBeCaptured(white)) {
+                        MoveMaker.unmakeMove(move, activePlayer, board);
+                        return false;
+                    }
+                    updateCastlingRights(targetSquare.getPiece(), sourceSquare);
                     return true;
+
                 }
             }
         }
         return false;
     }
 
+    private Square getTargetSquareForCastling(ChessMove chessMove) {
+        if (chessMove.isCastleShort() && activePlayer.isWhite()) {
+            return board.getSquares()[7][6];
+        } else if (chessMove.isCastleShort()) {
+            return board.getSquares()[0][6];
+        } else if (chessMove.isCastleLong() && activePlayer.isWhite()) {
+            return board.getSquares()[7][2];
+        } else {
+            return board.getSquares()[0][2];
+        }
+    }
+
     private boolean doesMoveMatchInput(Move move, Square sourceSquare, Square targetSquare, ChessMove chessMove) {
+        if (chessMove.isCastleShort() && Boolean.TRUE.equals(move.getCastleShort()) ||
+                chessMove.isCastleLong() && Boolean.TRUE.equals(move.getCastleLong())) {
+            return true;
+        }
+
         if (move.getStartSquare() == sourceSquare && move.getEndSquare() == targetSquare) {
             if (chessMove.isPawnPromotion()) {
                 return Boolean.TRUE.equals(move.getPromotion()) &&
@@ -118,12 +152,28 @@ public class Game {
 
     }
 
+    private void updateCastlingRights(Piece piece, Square sourceSquare) {
+        // handle rook/king move for castling rights
+        if (piece instanceof King && activePlayer.canCastleOnAtLeastOneSide()) {
+            activePlayer.disallowCastle();
+        } else if (piece instanceof Rook rook) {
+            if (sourceSquare.getFile() == 0 && activePlayer.isCastleLongAllowed() && !rook.isMoved()) {
+                activePlayer.setCastleLongAllowed(false);
+                rook.setMoved(true);
+            } else if (sourceSquare.getFile() == 7 && activePlayer.isCastleShortAllowed() && !rook.isMoved()) {
+                activePlayer.setCastleShortAllowed(false);
+                rook.setMoved(true);
+            }
+        }
+    }
+
     // Returns all legal moves of a player
     public List<Move> generate(boolean white) {
         List<Move> pseudoLegalMoves = generatePseudoLegalMoves(white);
         return filterMoves(pseudoLegalMoves, white);
     }
 
+    // returns a random legal move
     public Move generateMove(boolean white) {
         List<Move> legalMoves = generate(white);
 
@@ -134,16 +184,21 @@ public class Game {
     private List<Move> filterMoves(List<Move> pseudoLegalMoves, boolean white) {
         List<Move> legalMoves = new ArrayList<>();
         for (Move move : pseudoLegalMoves) {
-            MoveMaker.makeMove(move);
-            if (!checkIfKingCanBeCaptured(white)) {
+            // do not allow king to castle through check
+            if ((Boolean.TRUE.equals(move.getCastleShort()) || Boolean.TRUE.equals(move.getCastleLong())) &&
+                    threatenedOrCastlesThroughCheck(move)) {
+                continue;
+            }
+            MoveMaker.makeMove(move, activePlayer, board);
+            if (!canKingCanBeCaptured(white)) {
                 legalMoves.add(move);
             }
-            MoveMaker.unmakeMove(move);
+            MoveMaker.unmakeMove(move, activePlayer, board);
         }
         return legalMoves;
     }
 
-    private boolean checkIfKingCanBeCaptured(boolean white) {
+    private boolean canKingCanBeCaptured(boolean white) {
         // get all possible moves of opponent
         List<Move> pseudoLegalMoves = generatePseudoLegalMoves(!white);
         for (Move move : pseudoLegalMoves) {
@@ -152,6 +207,26 @@ public class Game {
                 return true;
             }
         }
+        return false;
+    }
+
+    // check if king is in check or adjacent square in direction of castle is threatened by opponent
+    // target square of king is checked later
+    private boolean threatenedOrCastlesThroughCheck(Move move) {
+        if (canKingCanBeCaptured(activePlayer.isWhite())) {
+            return true;
+        }
+        int direction = Boolean.TRUE.equals(move.getCastleShort()) ? 1 : -1;
+        // check if horizontal squares are threatened by the opponents pieces
+        Move moveToAdjacentSquare = new Move(move.getStartSquare(),
+                board.getSquares()[move.getStartSquare().getRank()][move.getStartSquare().getFile() + direction]);
+
+        MoveMaker.makeMove(moveToAdjacentSquare, activePlayer, board);
+        if (canKingCanBeCaptured(activePlayer.isWhite())) {
+            MoveMaker.unmakeMove(moveToAdjacentSquare, activePlayer, board);
+            return true;
+        }
+        MoveMaker.unmakeMove(moveToAdjacentSquare, activePlayer, board);
         return false;
     }
 
