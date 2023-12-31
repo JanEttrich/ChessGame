@@ -179,7 +179,7 @@ public class Game {
     }
 
     public void unmakeCastlingRightUpdate(Move move) {
-        Piece piece = move.getEndSquare().getPiece();
+        Piece piece = move.getPiece();
         Square sourceSquare = move.getStartSquare();
 
         // handle rook/king move for castling rights

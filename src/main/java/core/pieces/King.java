@@ -53,7 +53,7 @@ public class King extends Piece {
         if (activePlayer.isCastleLongAllowed()) {
             Square rookSquare = squares[requiredCastleRank][0];
             if (checkRookForCastle(rookSquare, activePlayer) && checkHorizontalOccupationsForCastle(squares,
-                    requiredCastleRank, -1)) {
+                    requiredCastleRank, -1) && !squares[requiredCastleRank][1].isOccupied()) {
                 moves.add(new Move(startSquare, squares[requiredCastleRank][2], false, true));
             }
 
