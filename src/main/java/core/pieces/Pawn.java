@@ -112,7 +112,7 @@ public class Pawn extends Piece {
         }
 
         // check if the target square is empty
-        return !squares[startRank + rankDirection][startFile + 1].isOccupied();
+        return !squares[startRank + rankDirection][startFile + fileDirection].isOccupied();
     }
 
     private boolean hasAdjacentPawn(Square[][] squares, int startRank, int startFile, int fileDirection) {
