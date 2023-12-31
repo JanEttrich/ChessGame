@@ -21,8 +21,7 @@ class MoveGenerationTest {
     }
 
     @ParameterizedTest
-    //@CsvSource({"1,0", "48,1", "2039,2", "97862,3", "4085603,4"})
-    @CsvSource({"2039,2"})
+    @CsvSource({"1,0", "48,1", "2039,2", "97862,3", "4085603,4"})
     void testPos2(int expectedPositionCount, int depth) {
         game = new Game("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R");
         assertEquals(expectedPositionCount, positionCounter(depth, true));
