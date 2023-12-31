@@ -21,16 +21,12 @@ public class Player {
         castleLongAllowed = false;
     }
 
-    public void reAllowCastle() {
+    public void reAllowedCastle() {
         castleShortAllowed = true;
         castleLongAllowed = true;
     }
 
     public boolean canCastleOnAtLeastOneSide() {
         return castleShortAllowed || castleLongAllowed;
-    }
-
-    public boolean cannotCastleOnAtLeastOneSide() {
-        return castleShortAllowed && castleLongAllowed;
     }
 }

@@ -8,6 +8,7 @@ import core.move.MoveTracker;
 import core.pieces.King;
 import core.pieces.Rook;
 import lombok.Getter;
+import lombok.Setter;
 import util.FenStringReader;
 
 import java.util.ArrayList;
@@ -23,13 +24,22 @@ public class Game {
     private final Player playerWhite;
     private final Player playerBlack;
     private final Random random = new Random();
+    @Getter
+    @Setter
     private Player activePlayer;
 
-    public Game() {
+    public Game(String posFen) {
         this.board = new Board();
         this.playerWhite = new Player(true, true);
         this.playerBlack = new Player(false, true);
         this.activePlayer = playerWhite;
+        if (posFen == null) {
+            initStartingPosition();
+        } else {
+            initPositionFromFen(posFen);
+        }
+        GameState.resetGameState(playerWhite, playerBlack);
+        MoveTracker.resetMoves();
     }
 
     public void initStartingPosition() {
@@ -41,12 +51,6 @@ public class Game {
     }
 
     public void startGame() {
-        //initStartingPosition();
-        initPositionFromFen("8/1k6/8/8/8/8/8/4K2R");
-        board.printBoard();
-        GameState.resetGameState(playerWhite, playerBlack);
-        MoveTracker.resetMoves();
-
         Scanner scanner = new Scanner(System.in);
         while (true) {
             if (!canPlayerMove(activePlayer.isWhite())) {
@@ -73,8 +77,8 @@ public class Game {
             } else {
                 var move = generateMove(activePlayer.isWhite());
                 System.out.println("Move" + (activePlayer.isWhite() ? "(white)" : "(black)") + ": " + move);
-                MoveMaker.makeMove(move, activePlayer, board);
-                updateCastlingRights(move.getEndSquare().getPiece(), move.getStartSquare());
+                MoveMaker.makeMove(move, activePlayer.isWhite(), board);
+                updateCastlingRights(move);
                 activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
                 board.printBoard();
             }
@@ -109,12 +113,12 @@ public class Game {
                             threatenedOrCastlesThroughCheck(move)) {
                         return false;
                     }
-                    MoveMaker.makeMove(move, activePlayer, board);
+                    MoveMaker.makeMove(move, white, board);
                     if (canKingCanBeCaptured(white)) {
-                        MoveMaker.unmakeMove(move, activePlayer, board);
+                        MoveMaker.unmakeMove(move, white, board);
                         return false;
                     }
-                    updateCastlingRights(targetSquare.getPiece(), sourceSquare);
+                    updateCastlingRights(move);
                     return true;
 
                 }
@@ -152,17 +156,42 @@ public class Game {
 
     }
 
-    private void updateCastlingRights(Piece piece, Square sourceSquare) {
+    public boolean updateCastlingRights(Move move) {
+        Piece piece = move.getEndSquare().getPiece();
+        Square sourceSquare = move.getStartSquare();
+
         // handle rook/king move for castling rights
         if (piece instanceof King && activePlayer.canCastleOnAtLeastOneSide()) {
             activePlayer.disallowCastle();
+            return true;
         } else if (piece instanceof Rook rook) {
             if (sourceSquare.getFile() == 0 && activePlayer.isCastleLongAllowed() && !rook.isMoved()) {
                 activePlayer.setCastleLongAllowed(false);
                 rook.setMoved(true);
+                return true;
             } else if (sourceSquare.getFile() == 7 && activePlayer.isCastleShortAllowed() && !rook.isMoved()) {
                 activePlayer.setCastleShortAllowed(false);
                 rook.setMoved(true);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void unmakeCastlingRightUpdate(Move move) {
+        Piece piece = move.getEndSquare().getPiece();
+        Square sourceSquare = move.getStartSquare();
+
+        // handle rook/king move for castling rights
+        if (piece instanceof King) {
+            activePlayer.reAllowedCastle();
+        } else if (piece instanceof Rook rook) {
+            if (sourceSquare.getFile() == 0) {
+                activePlayer.setCastleLongAllowed(true);
+                rook.setMoved(false);
+            } else if (sourceSquare.getFile() == 7) {
+                activePlayer.setCastleShortAllowed(true);
+                rook.setMoved(false);
             }
         }
     }
@@ -189,11 +218,11 @@ public class Game {
                     threatenedOrCastlesThroughCheck(move)) {
                 continue;
             }
-            MoveMaker.makeMove(move, activePlayer, board);
+            MoveMaker.makeMove(move, white, board);
             if (!canKingCanBeCaptured(white)) {
                 legalMoves.add(move);
             }
-            MoveMaker.unmakeMove(move, activePlayer, board);
+            MoveMaker.unmakeMove(move, white, board);
         }
         return legalMoves;
     }
@@ -221,12 +250,12 @@ public class Game {
         Move moveToAdjacentSquare = new Move(move.getStartSquare(),
                 board.getSquares()[move.getStartSquare().getRank()][move.getStartSquare().getFile() + direction]);
 
-        MoveMaker.makeMove(moveToAdjacentSquare, activePlayer, board);
+        MoveMaker.makeMove(moveToAdjacentSquare, activePlayer.isWhite(), board);
         if (canKingCanBeCaptured(activePlayer.isWhite())) {
-            MoveMaker.unmakeMove(moveToAdjacentSquare, activePlayer, board);
+            MoveMaker.unmakeMove(moveToAdjacentSquare, activePlayer.isWhite(), board);
             return true;
         }
-        MoveMaker.unmakeMove(moveToAdjacentSquare, activePlayer, board);
+        MoveMaker.unmakeMove(moveToAdjacentSquare, activePlayer.isWhite(), board);
         return false;
     }
 
