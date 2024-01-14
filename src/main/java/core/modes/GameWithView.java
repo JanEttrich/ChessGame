@@ -15,16 +15,7 @@ public class GameWithView extends Game {
         var legalMoves = generate(activePlayer.isWhite());
         for (Move move : legalMoves) {
             if (doesMoveMatchUiMove(move, moveResource)) {
-                if ((Boolean.TRUE.equals(move.getCastleShort()) || Boolean.TRUE.equals(move.getCastleLong())) &&
-                        threatenedOrCastlesThroughCheck(move)) {
-                    return false;
-                }
-
                 MoveMaker.makeMove(move, activePlayer.isWhite(), board);
-                if (canKingCanBeCaptured()) {
-                    MoveMaker.unmakeMove(move, activePlayer.isWhite(), board);
-                    return false;
-                }
                 updateCastlingRights(move);
                 activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
                 return true;
