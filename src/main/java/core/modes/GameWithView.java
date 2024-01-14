@@ -11,8 +11,6 @@ public class GameWithView extends Game {
         super(posFen, humanOpponent);
     }
 
-    // TODO: Select promotion piece
-
     public boolean handleMove(MoveResource moveResource) {
         var legalMoves = generate();
         for (Move move : legalMoves) {
