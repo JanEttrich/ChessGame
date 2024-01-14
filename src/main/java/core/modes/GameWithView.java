@@ -15,7 +15,7 @@ public class GameWithView extends Game {
     // TODO: Show legal target Squares
 
     public boolean handleMove(MoveResource moveResource) {
-        var legalMoves = generate(activePlayer.isWhite());
+        var legalMoves = generate();
         for (Move move : legalMoves) {
             if (doesMoveMatchUiMove(move, moveResource)) {
                 MoveMaker.makeMove(move, activePlayer.isWhite(), board);

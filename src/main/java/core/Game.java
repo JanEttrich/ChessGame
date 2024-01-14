@@ -51,17 +51,17 @@ public abstract class Game {
     }
 
     public boolean canPlayerMove() {
-        return !generate(activePlayer.isWhite()).isEmpty();
+        return !generate().isEmpty();
     }
 
     // Returns all legal moves of a player
-    public List<Move> generate(boolean white) {
-        List<Move> pseudoLegalMoves = generatePseudoLegalMoves(white);
-        return filterMoves(pseudoLegalMoves, white);
+    public List<Move> generate() {
+        List<Move> pseudoLegalMoves = generatePseudoLegalMoves(activePlayer.isWhite());
+        return filterMoves(pseudoLegalMoves);
     }
 
-    public Move makeRandomMove(boolean white) {
-        List<Move> legalMoves = generate(white);
+    public Move makeRandomMove() {
+        List<Move> legalMoves = generate();
         int randomIndex = random.nextInt(legalMoves.size());
 
         Move randomMove = legalMoves.get(randomIndex);
@@ -71,7 +71,7 @@ public abstract class Game {
         return randomMove;
     }
 
-    private List<Move> filterMoves(List<Move> pseudoLegalMoves, boolean white) {
+    public List<Move> filterMoves(List<Move> pseudoLegalMoves) {
         List<Move> legalMoves = new ArrayList<>();
         for (Move move : pseudoLegalMoves) {
             // do not allow king to castle through check
@@ -79,11 +79,11 @@ public abstract class Game {
                     threatenedOrCastlesThroughCheck(move)) {
                 continue;
             }
-            MoveMaker.makeMove(move, white, board);
+            MoveMaker.makeMove(move, activePlayer.isWhite(), board);
             if (!canKingCanBeCaptured()) {
                 legalMoves.add(move);
             }
-            MoveMaker.unmakeMove(move, white, board);
+            MoveMaker.unmakeMove(move, activePlayer.isWhite(), board);
         }
         return legalMoves;
     }

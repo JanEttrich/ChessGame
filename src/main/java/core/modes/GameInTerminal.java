@@ -32,10 +32,10 @@ public class GameInTerminal extends Game {
             if (activePlayer.isHuman()) {
                 System.out.print("Move" + (activePlayer.isWhite() ? "(White)" : "(Black)") + ": ");
                 String move = scanner.next();
-                handleChessMoveString(move, activePlayer.isWhite());
+                handleChessMoveString(move);
                 board.printBoard();
             } else {
-                var move = makeRandomMove(activePlayer.isWhite());
+                var move = makeRandomMove();
                 System.out.println("Move" + (activePlayer.isWhite() ? "(White)" : "(Black)") + ": " + move);
                 board.printBoard();
             }
@@ -45,7 +45,7 @@ public class GameInTerminal extends Game {
 
 
     // move String handling
-    public boolean handleChessMoveString(String moveString, boolean white) {
+    public boolean handleChessMoveString(String moveString) {
         ChessMove chessMove = getMoveFromString(moveString);
         if (chessMove == null) {
             return false;
@@ -62,7 +62,7 @@ public class GameInTerminal extends Game {
         // find piece of correct type on board
         String pieceString = chessMove.getPiece();
 
-        List<Square> squaresWithPiece = board.getPositionOfPiecesByType(pieceString, white);
+        List<Square> squaresWithPiece = board.getPositionOfPiecesByType(pieceString, activePlayer.isWhite());
         for (Square sourceSquare : squaresWithPiece) {
             Piece piece = sourceSquare.getPiece();
             List<Move> pseudoLegalMovesForPiece = piece.getPseudoLegalMovesForPiece(board.getSquares(), sourceSquare);
@@ -74,9 +74,9 @@ public class GameInTerminal extends Game {
                             threatenedOrCastlesThroughCheck(move)) {
                         return false;
                     }
-                    MoveMaker.makeMove(move, white, board);
+                    MoveMaker.makeMove(move, activePlayer.isWhite(), board);
                     if (canKingCanBeCaptured()) {
-                        MoveMaker.unmakeMove(move, white, board);
+                        MoveMaker.unmakeMove(move, activePlayer.isWhite(), board);
                         return false;
                     }
                     updateCastlingRights(move);
