@@ -12,7 +12,8 @@ public class BoardDisplay extends JPanel {
     public static final int SQUARE_SIZE = 85;
     private final int rows;
     private final int cols;
-    private final Board board;
+    @Setter
+    private Board board;
     private final PieceDisplay pieceDisplay;
 
     @Getter

@@ -52,18 +52,16 @@ public class Game {
     }
 
     public void handleMove(MoveResource moveResource) {
-
         var legalMoves = generate(activePlayer.isWhite());
         for (Move move : legalMoves) {
             if (doesMoveMatchUiMove(move, moveResource)) {
-
                 if ((Boolean.TRUE.equals(move.getCastleShort()) || Boolean.TRUE.equals(move.getCastleLong())) &&
                         threatenedOrCastlesThroughCheck(move)) {
                     return;
                 }
 
                 MoveMaker.makeMove(move, activePlayer.isWhite(), board);
-                if (canKingCanBeCaptured(activePlayer.isWhite())) {
+                if (canKingCanBeCaptured()) {
                     MoveMaker.unmakeMove(move, activePlayer.isWhite(), board);
                     return;
                 }
@@ -72,6 +70,10 @@ public class Game {
                 return;
             }
         }
+    }
+
+    public boolean canPlayerMove() {
+        return !generate(activePlayer.isWhite()).isEmpty();
     }
 
     private boolean doesMoveMatchUiMove(Move move, MoveResource moveResource) {
@@ -147,7 +149,7 @@ public class Game {
                         return false;
                     }
                     MoveMaker.makeMove(move, white, board);
-                    if (canKingCanBeCaptured(white)) {
+                    if (canKingCanBeCaptured()) {
                         MoveMaker.unmakeMove(move, white, board);
                         return false;
                     }
@@ -252,7 +254,7 @@ public class Game {
                 continue;
             }
             MoveMaker.makeMove(move, white, board);
-            if (!canKingCanBeCaptured(white)) {
+            if (!canKingCanBeCaptured()) {
                 legalMoves.add(move);
             }
             MoveMaker.unmakeMove(move, white, board);
@@ -260,9 +262,9 @@ public class Game {
         return legalMoves;
     }
 
-    private boolean canKingCanBeCaptured(boolean white) {
+    public boolean canKingCanBeCaptured() {
         // get all possible moves of opponent
-        List<Move> pseudoLegalMoves = generatePseudoLegalMoves(!white);
+        List<Move> pseudoLegalMoves = generatePseudoLegalMoves(!activePlayer.isWhite());
         for (Move move : pseudoLegalMoves) {
             if (move.getEndSquare().isOccupied() && move.getEndSquare().getPiece().getDisplay().equalsIgnoreCase("K")) {
                 // if king can be captured directly, last move was illegal, regardless of if the capturing move is illegal
@@ -275,7 +277,7 @@ public class Game {
     // check if king is in check or adjacent square in direction of castle is threatened by opponent
     // target square of king is checked later
     private boolean threatenedOrCastlesThroughCheck(Move move) {
-        if (canKingCanBeCaptured(activePlayer.isWhite())) {
+        if (canKingCanBeCaptured()) {
             return true;
         }
         int direction = Boolean.TRUE.equals(move.getCastleShort()) ? 1 : -1;
@@ -284,7 +286,7 @@ public class Game {
                 board.getSquares()[move.getStartSquare().getRank()][move.getStartSquare().getFile() + direction]);
 
         MoveMaker.makeMove(moveToAdjacentSquare, activePlayer.isWhite(), board);
-        if (canKingCanBeCaptured(activePlayer.isWhite())) {
+        if (canKingCanBeCaptured()) {
             MoveMaker.unmakeMove(moveToAdjacentSquare, activePlayer.isWhite(), board);
             return true;
         }

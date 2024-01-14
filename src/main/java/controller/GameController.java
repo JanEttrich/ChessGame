@@ -5,12 +5,16 @@ import frontend.BoardDisplay;
 import frontend.ContainerDisplay;
 import frontend.MoveResource;
 
+import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static java.lang.System.exit;
+
 public class GameController extends MouseAdapter {
-    private final Game game;
-    private final BoardDisplay boardDisplay;
+    private Game game;
+    private BoardDisplay boardDisplay;
+    private final ContainerDisplay containerDisplay;
 
     // record mouse press
     private int startRow = 0;
@@ -25,7 +29,7 @@ public class GameController extends MouseAdapter {
         boardDisplay.addMouseMotionListener(this);
 
         // add board to background container
-        ContainerDisplay containerDisplay = new ContainerDisplay(boardDisplay);
+        containerDisplay = new ContainerDisplay(boardDisplay);
         containerDisplay.getFrame().setVisible(true);
     }
 
@@ -54,5 +58,38 @@ public class GameController extends MouseAdapter {
 
         boardDisplay.repaint();
         boardDisplay.setSelectedPiece(null);
+
+        if (game.canPlayerMove()) {
+            return;
+        }
+        showGameEndDialog();
+    }
+
+    public void showGameEndDialog() {
+        String title;
+        String message;
+        if (game.canKingCanBeCaptured()) {
+            title = "Checkmate";
+            message = "Checkmate, " + (game.getActivePlayer().isWhite() ? "Black" : "White") + " wins";
+        } else {
+            title = "Stalemate";
+            message = "Draw by Stalemate";
+        }
+
+        int option = JOptionPane.showOptionDialog(null, message, title,
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE, null,
+                new String[]{"restart"}, null);
+        if (option == 0) {
+            resetGame();
+        } else {
+            exit(0);
+        }
+    }
+
+    public void resetGame() {
+        game = new Game(null);
+        boardDisplay.setBoard(game.getBoard());
+        boardDisplay.repaint();
     }
 }
