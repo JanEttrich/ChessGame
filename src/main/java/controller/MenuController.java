@@ -34,9 +34,11 @@ public class MenuController {
         if (inputOption == 0) {
             frame.setVisible(false);
             new ViewController(humanOpponent);
+
         } else if (inputOption == 1) {
             frame.setVisible(false);
             new GameInTerminal(null, humanOpponent).startGameOnTerminal();
+
         } else {
             exit(0);
         }

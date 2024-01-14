@@ -57,19 +57,15 @@ public abstract class Game {
         return filterMoves(pseudoLegalMoves, white);
     }
 
-    // returns a random legal move
-    public Move generateMove(boolean white) {
+    public Move makeRandomMove(boolean white) {
         List<Move> legalMoves = generate(white);
-
         int randomIndex = random.nextInt(legalMoves.size());
-        return legalMoves.get(randomIndex);
-    }
 
-    public void makeRandomMove(boolean white) {
-        Move randomMove = generateMove(white);
+        Move randomMove = legalMoves.get(randomIndex);
         MoveMaker.makeMove(randomMove, activePlayer.isWhite(), board);
         updateCastlingRights(randomMove);
         activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
+        return randomMove;
     }
 
     private List<Move> filterMoves(List<Move> pseudoLegalMoves, boolean white) {

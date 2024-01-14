@@ -18,30 +18,29 @@ public class GameInTerminal extends Game {
     }
 
     public void startGameOnTerminal() {
+        board.printBoard();
         Scanner scanner = new Scanner(System.in);
         while (true) {
             if (!canPlayerMove()) {
                 if (canKingCanBeCaptured()) {
-                    System.out.println("Checkmate, " + (activePlayer.isWhite() ? "black" : "white") + " wins");
+                    System.out.println("Checkmate, " + (activePlayer.isWhite() ? "Black" : "White") + " wins");
                 } else {
                     System.out.println("Draw by Stalemate");
                 }
                 break;
             }
             if (activePlayer.isHuman()) {
-                System.out.print("Move" + (activePlayer.isWhite() ? "(white)" : "(black)") + ": ");
+                System.out.print("Move" + (activePlayer.isWhite() ? "(White)" : "(Black)") + ": ");
                 String move = scanner.next();
                 handleChessMoveString(move, activePlayer.isWhite());
                 board.printBoard();
             } else {
-                var move = generateMove(activePlayer.isWhite());
-                System.out.println("Move" + (activePlayer.isWhite() ? "(white)" : "(black)") + ": " + move);
-                MoveMaker.makeMove(move, activePlayer.isWhite(), board);
-                updateCastlingRights(move);
-                activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
+                var move = makeRandomMove(activePlayer.isWhite());
+                System.out.println("Move" + (activePlayer.isWhite() ? "(White)" : "(Black)") + ": " + move);
                 board.printBoard();
             }
         }
+        System.exit(0);
     }
 
 
