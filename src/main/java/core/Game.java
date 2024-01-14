@@ -7,6 +7,7 @@ import core.move.MoveMaker;
 import core.move.MoveTracker;
 import core.pieces.King;
 import core.pieces.Rook;
+import frontend.MoveResource;
 import lombok.Getter;
 import lombok.Setter;
 import util.FenStringReader;
@@ -50,7 +51,39 @@ public class Game {
         FenStringReader.read(fen, board);
     }
 
-    public void startGame() {
+    public void handleMove(MoveResource moveResource) {
+
+        var legalMoves = generate(activePlayer.isWhite());
+        for (Move move : legalMoves) {
+            if (doesMoveMatchUiMove(move, moveResource)) {
+
+                if ((Boolean.TRUE.equals(move.getCastleShort()) || Boolean.TRUE.equals(move.getCastleLong())) &&
+                        threatenedOrCastlesThroughCheck(move)) {
+                    return;
+                }
+
+                MoveMaker.makeMove(move, activePlayer.isWhite(), board);
+                if (canKingCanBeCaptured(activePlayer.isWhite())) {
+                    MoveMaker.unmakeMove(move, activePlayer.isWhite(), board);
+                    return;
+                }
+                updateCastlingRights(move);
+                activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
+                return;
+            }
+        }
+    }
+
+    private boolean doesMoveMatchUiMove(Move move, MoveResource moveResource) {
+        Square startSquare = move.getStartSquare();
+        Square endSquare = move.getEndSquare();
+        return startSquare.isOccupied() && startSquare.getRank() == moveResource.getStartRow() &&
+                startSquare.getFile() == moveResource.getStartCol() &&
+                endSquare.getRank() == moveResource.getEndRow() && endSquare.getFile() == moveResource.getEndCol();
+    }
+
+
+    public void startGameOnTerminal() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             if (!canPlayerMove(activePlayer.isWhite())) {
