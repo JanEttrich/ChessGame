@@ -29,6 +29,9 @@ public class GameInTerminal extends Game {
                 }
                 break;
             }
+            if (isInsufficientMaterial()) {
+                System.out.println("Draw by insufficient material");
+            }
             if (activePlayer.isHuman()) {
                 System.out.print("Move" + (activePlayer.isWhite() ? "(White)" : "(Black)") + ": ");
                 String move = scanner.next();
