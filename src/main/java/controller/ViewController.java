@@ -1,6 +1,6 @@
 package controller;
 
-import core.Game;
+import core.modes.GameWithView;
 import frontend.BoardDisplay;
 import frontend.ContainerDisplay;
 import frontend.MoveResource;
@@ -11,17 +11,19 @@ import java.awt.event.MouseEvent;
 
 import static java.lang.System.exit;
 
-public class GameController extends MouseAdapter {
-    private Game game;
+public class ViewController extends MouseAdapter {
+    private GameWithView game;
     private BoardDisplay boardDisplay;
     private final ContainerDisplay containerDisplay;
+    private final boolean humanOpponent;
 
     // record mouse press
     private int startRow = 0;
     private int startCol = 0;
 
-    public GameController() {
-        game = new Game(null);
+    public ViewController(boolean humanOpponent) {
+        this.humanOpponent = humanOpponent;
+        game = new GameWithView(null, humanOpponent);
         boardDisplay = new BoardDisplay(game.getBoard());
 
         // register controller as observer
@@ -54,15 +56,26 @@ public class GameController extends MouseAdapter {
     public void mouseReleased(MouseEvent e) {
         int endRow = e.getY() / BoardDisplay.SQUARE_SIZE;
         int endCol = e.getX() / BoardDisplay.SQUARE_SIZE;
-        game.handleMove(new MoveResource(startRow, startCol, endRow, endCol));
+        boolean moved = game.handleMove(new MoveResource(startRow, startCol, endRow, endCol));
 
         boardDisplay.repaint();
         boardDisplay.setSelectedPiece(null);
 
-        if (game.canPlayerMove()) {
+        if (!moved) {
             return;
         }
-        showGameEndDialog();
+
+        if (!game.canPlayerMove()) {
+            showGameEndDialog();
+            return;
+        }
+
+        if (!humanOpponent) {
+            game.makeRandomMove(game.getActivePlayer().isWhite());
+            if (!game.canPlayerMove()) {
+                showGameEndDialog();
+            }
+        }
     }
 
     public void showGameEndDialog() {
@@ -88,7 +101,7 @@ public class GameController extends MouseAdapter {
     }
 
     public void resetGame() {
-        game = new Game(null);
+        game = new GameWithView(null, humanOpponent);
         boardDisplay.setBoard(game.getBoard());
         boardDisplay.repaint();
     }
