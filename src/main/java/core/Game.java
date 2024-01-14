@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public abstract class Game {
+public class Game {
 
     private static final String START_POS_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
     @Getter
@@ -25,7 +25,7 @@ public abstract class Game {
     @Setter
     protected Player activePlayer;
 
-    protected Game(String posFen, boolean humanOpponent) {
+    public Game(String posFen, boolean humanOpponent) {
         this.board = new Board();
         this.playerWhite = new Player(true, true);
         this.playerBlack = new Player(false, humanOpponent);
@@ -52,6 +52,30 @@ public abstract class Game {
 
     public boolean canPlayerMove() {
         return !generate().isEmpty();
+    }
+
+    // Returns true if both players only have a king left
+    public boolean isInsufficientMaterial() {
+        return checkInsufficientMaterialForPlayer(true) && checkInsufficientMaterialForPlayer(false);
+    }
+
+    public boolean checkInsufficientMaterialForPlayer(boolean white) {
+        int knightCount = 0;
+        int bishopCount = 0;
+        var piecePositions = board.getAllPiecePositionsOfPlayer(white);
+        if (piecePositions.size() > 2) {
+            return false;
+        }
+        for (Square square : piecePositions) {
+            if (square.getPiece().getDisplay().equalsIgnoreCase("N")) {
+                knightCount += 1;
+            } else if (square.getPiece().getDisplay().equalsIgnoreCase("B")) {
+                bishopCount += 1;
+            } else if (!square.getPiece().getDisplay().equalsIgnoreCase("K")) {
+                return false;
+            }
+        }
+        return knightCount + bishopCount <= 1;
     }
 
     // Returns all legal moves of a player

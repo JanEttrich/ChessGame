@@ -72,14 +72,14 @@ public class ViewController extends MouseAdapter {
             return;
         }
 
-        if (!game.canPlayerMove()) {
+        if (!game.canPlayerMove() || game.isInsufficientMaterial()) {
             showGameEndDialog();
             return;
         }
 
         if (!humanOpponent) {
             game.makeRandomMove();
-            if (!game.canPlayerMove()) {
+            if (!game.canPlayerMove() || game.isInsufficientMaterial()) {
                 showGameEndDialog();
             }
         }
@@ -91,6 +91,9 @@ public class ViewController extends MouseAdapter {
         if (game.canKingCanBeCaptured()) {
             title = "Checkmate";
             message = "Checkmate, " + (game.getActivePlayer().isWhite() ? "Black" : "White") + " wins";
+        } else if (game.isInsufficientMaterial()) {
+            title = "Draw";
+            message = "Draw by insufficient material";
         } else {
             title = "Stalemate";
             message = "Draw by Stalemate";

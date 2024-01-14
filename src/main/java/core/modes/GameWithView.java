@@ -12,7 +12,6 @@ public class GameWithView extends Game {
     }
 
     // TODO: Select promotion piece
-    // TODO: Show legal target Squares
 
     public boolean handleMove(MoveResource moveResource) {
         var legalMoves = generate();
