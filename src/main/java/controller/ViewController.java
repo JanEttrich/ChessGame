@@ -2,7 +2,6 @@ package controller;
 
 import core.modes.GameWithView;
 import frontend.BoardDisplay;
-import frontend.ContainerDisplay;
 import frontend.MoveResource;
 
 import javax.swing.*;
@@ -13,8 +12,7 @@ import static java.lang.System.exit;
 
 public class ViewController extends MouseAdapter {
     private GameWithView game;
-    private BoardDisplay boardDisplay;
-    private final ContainerDisplay containerDisplay;
+    private final BoardDisplay boardDisplay;
     private final boolean humanOpponent;
 
     // record mouse press
@@ -31,8 +29,9 @@ public class ViewController extends MouseAdapter {
         boardDisplay.addMouseMotionListener(this);
 
         // add board to background container
-        containerDisplay = new ContainerDisplay(boardDisplay);
-        containerDisplay.getFrame().setVisible(true);
+        JFrame frame = FrameInitializer.initFrame();
+        frame.add(boardDisplay);
+        frame.setVisible(true);
     }
 
     @Override

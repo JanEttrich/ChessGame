@@ -3,19 +3,12 @@ package controller;
 import core.modes.GameInTerminal;
 
 import javax.swing.*;
-import java.awt.*;
 
 import static java.lang.System.exit;
 
 public class MenuController {
     public MenuController() {
-        JFrame frame = new JFrame();
-        frame.getContentPane().setBackground(Color.BLACK);
-        frame.setLayout(new GridBagLayout());
-        frame.setMinimumSize(new Dimension(800, 800));
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
+        JFrame frame = FrameInitializer.initFrame();
         frame.setVisible(true);
 
         int gameModeOption = JOptionPane.showOptionDialog(null, "Wähle deinen Gegner aus", "Gegner",
