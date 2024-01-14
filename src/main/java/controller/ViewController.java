@@ -1,6 +1,7 @@
 package controller;
 
 import core.modes.GameWithView;
+import core.move.Move;
 import frontend.BoardDisplay;
 import frontend.MoveResource;
 
@@ -39,6 +40,12 @@ public class ViewController extends MouseAdapter {
         startRow = e.getY() / BoardDisplay.SQUARE_SIZE;
         startCol = e.getX() / BoardDisplay.SQUARE_SIZE;
         boardDisplay.setSelectedPiece(game.getBoard().getPieceFromSquare(startRow, startCol));
+        if (boardDisplay.getSelectedPiece() != null) {
+            var legalMovesForPiece = game.filterMoves(boardDisplay.getSelectedPiece()
+                    .getPseudoLegalMovesForPiece(game.getBoard().getSquares(), game.getBoard().getSquares()[startRow][startCol]));
+            var availableSquares = legalMovesForPiece.stream().map(Move::getEndSquare).toList();
+            boardDisplay.getAvailableSquares().addAll(availableSquares);
+        }
     }
 
     @Override
@@ -59,6 +66,7 @@ public class ViewController extends MouseAdapter {
 
         boardDisplay.repaint();
         boardDisplay.setSelectedPiece(null);
+        boardDisplay.getAvailableSquares().clear();
 
         if (!moved) {
             return;
@@ -70,7 +78,7 @@ public class ViewController extends MouseAdapter {
         }
 
         if (!humanOpponent) {
-            game.makeRandomMove(game.getActivePlayer().isWhite());
+            game.makeRandomMove();
             if (!game.canPlayerMove()) {
                 showGameEndDialog();
             }
