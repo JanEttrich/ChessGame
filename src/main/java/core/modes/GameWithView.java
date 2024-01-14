@@ -11,6 +11,9 @@ public class GameWithView extends Game {
         super(posFen, humanOpponent);
     }
 
+    // TODO: Select promotion piece
+    // TODO: Show legal target Squares
+
     public boolean handleMove(MoveResource moveResource) {
         var legalMoves = generate(activePlayer.isWhite());
         for (Move move : legalMoves) {

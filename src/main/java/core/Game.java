@@ -39,6 +39,9 @@ public abstract class Game {
         MoveTracker.resetMoves();
     }
 
+    // TODO: Draw by repetition
+    // TODO: Draw by 50 move rule
+
     public void initStartingPosition() {
         FenStringReader.read(START_POS_FEN, board);
     }
