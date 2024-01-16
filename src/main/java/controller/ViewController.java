@@ -54,7 +54,7 @@ public class ViewController extends MouseAdapter {
     public void mousePressed(MouseEvent e) {
         startRow = e.getY() / BoardDisplay.SQUARE_SIZE;
         startCol = e.getX() / BoardDisplay.SQUARE_SIZE;
-        boardDisplay.setSelectedSquare(startRow * 8 + startCol);
+        boardDisplay.setSelectedSquare((7 - startRow) * 8 + startCol);
         if (squares[boardDisplay.getSelectedSquare()] != Pieces.NONE) {
             int color = game.getActivePlayer().isWhite() ? Pieces.WHITE : Pieces.BLACK;
             var legalMovesForPiece = game.filterMoves(Pieces.generatePseudoLegalMoves(boardDisplay.getSelectedSquare(), color));
@@ -65,7 +65,7 @@ public class ViewController extends MouseAdapter {
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if (boardDisplay.getSelectedSquare() != null && squares[boardDisplay.getSelectedSquare()] != Pieces.NONE) {
+        if (boardDisplay.getSelectedSquare() != -1 && squares[boardDisplay.getSelectedSquare()] != Pieces.NONE) {
             // fix offset of selected piece to mouse
             boardDisplay.setSelectedXPos(e.getX() - BoardDisplay.SQUARE_SIZE / 2);
             boardDisplay.setSelectedYPos(e.getY() - BoardDisplay.SQUARE_SIZE / 2);
@@ -80,7 +80,7 @@ public class ViewController extends MouseAdapter {
         boolean moved = game.handleMove(new MoveResource(startRow, startCol, endRow, endCol));
 
         boardDisplay.repaint();
-        boardDisplay.setSelectedSquare(null);
+        boardDisplay.setSelectedSquare(-1);
         boardDisplay.getAvailableSquares().clear();
 
         if (!moved) {

@@ -23,7 +23,7 @@ public class BoardDisplay extends JPanel {
     // fields changing on mouse actions
     @Getter
     @Setter
-    private Integer selectedSquare;
+    private int selectedSquare = -1;
     @Getter
     private final List<Integer> availableSquares = new ArrayList<>();
     @Setter
@@ -55,30 +55,31 @@ public class BoardDisplay extends JPanel {
 
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
-                int piece = squares[row * 8 + col];
-
+                // collect piece on the top left first, as drawing occurs from top left to bottom right
+                int piece = squares[(7 - row) * 8 + col];
                 // highlight square with selected piece or if it is reachable with capture
-                if (piece != Pieces.NONE && selectedSquare != null && (piece == squares[selectedSquare] || availableSquares.contains(selectedSquare))) {
-                    g2d.setColor(new Color(100, 111, 64));
-                } else {
-                    g2d.setColor((row + col) % 2 == 0 ? new Color(227, 197, 181) : new Color(157, 105, 53));
-                }
+                //if (piece != Pieces.NONE && selectedSquare != null && (piece == squares[selectedSquare] || availableSquares.contains(selectedSquare))) {
+                //} else {
+                g2d.setColor((row + col) % 2 == 0 ? new Color(227, 197, 181) : new Color(157, 105, 53));
+                // }
                 // draw square
                 g2d.fillRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
 
 
                 // draw circle for reachable square
+                /*
                 if (availableSquares.contains(selectedSquare)) {
                     g2d.drawImage(squareMarker, col * SQUARE_SIZE + SQUARE_SIZE / 3, row * SQUARE_SIZE + SQUARE_SIZE / 3, null);
-                }
+                }*/
 
                 // draw piece
-                if (piece != Pieces.NONE && selectedSquare != null && row * 8 + col != selectedSquare) {
+                if (piece != Pieces.NONE && (7 - row) * 8 + col != selectedSquare) {
                     pieceDisplay.paint(g2d, piece, col * SQUARE_SIZE, row * SQUARE_SIZE);
                 }
 
+
                 // draw selected piece
-                if (selectedSquare != null && squares[selectedSquare] != Pieces.NONE) {
+                if (selectedSquare != -1 && squares[selectedSquare] != Pieces.NONE) {
                     pieceDisplay.paint(g2d, squares[selectedSquare], selectedXPos, selectedYPos);
                 }
             }

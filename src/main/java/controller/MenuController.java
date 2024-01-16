@@ -17,6 +17,7 @@ public class MenuController {
             exit(0);
         }
         boolean humanOpponent = gameModeOption == 1;
+        frame.setVisible(false);
         new ViewController(humanOpponent);
 
 
