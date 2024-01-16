@@ -19,7 +19,7 @@ public class Board {
     public static String intToChessSquare(int index) {
         int rank = index / 8;
         int file = index % 8;
-        return RANKS.charAt(rank) + Character.toString(FILES.charAt(file));
+        return Character.toString(FILES.charAt(file)) + RANKS.charAt(rank);
     }
 
     public static List<Integer> getAllPiecePositionsOfPlayer(boolean white) {

@@ -63,7 +63,6 @@ class MoveGenerationTest {
 
         List<Move> moves = game.generate();
         int numPositions = 0;
-        Player activePlayer = game.getActivePlayer();
 
         for (Move move : moves) {
             MoveMaker.makeMove(move);

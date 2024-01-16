@@ -40,7 +40,7 @@ public class PieceMovementHelper {
 
         int rightBound = 8 - leftBound;
         // right
-        for (int endSquare = startSquare + 1; endSquare < rightBound; endSquare++) {
+        for (int endSquare = startSquare + 1; endSquare < startSquare + rightBound; endSquare++) {
             if (!processSingleMove(startSquare, endSquare, color, moves)) {
                 break;
             }
@@ -104,7 +104,7 @@ public class PieceMovementHelper {
 
         for (int direction : knightDirections) {
             int endSquare = startSquare + direction;
-            if (endSquare > 0 && endSquare < 64 &&
+            if (endSquare >= 0 && endSquare < 64 &&
                     (squares[endSquare] == Pieces.NONE ||
                             !Pieces.isPieceOfColor(squares[endSquare], color))) {
                 moves.add(new Move(startSquare, endSquare));
@@ -137,7 +137,7 @@ public class PieceMovementHelper {
         }
 
         // castling
-        int requiredCastleRank = color == Pieces.WHITE ? 7 : 0;
+        int requiredCastleRank = color == Pieces.WHITE ? 0 : 7;
         if (startSquare / 8 != requiredCastleRank || startSquare % 8 != 4) {
             return moves;
         }
@@ -145,7 +145,7 @@ public class PieceMovementHelper {
         Player activePlayer = color == Pieces.WHITE ? GameState.playerWhite : GameState.playerBlack;
         if (activePlayer.isCastleShortAllowed() && squares[startSquare + 1] == Pieces.NONE && squares[startSquare + 2] == Pieces.NONE &&
                 squares[startSquare + 3] != Pieces.NONE && squares[startSquare + 3] == (Pieces.ROOK | color)) {
-            moves.add(new Move(startSquare, startSquare + 2, false, true));
+            moves.add(new Move(startSquare, startSquare + 2, true, false));
 
         }
         if (activePlayer.isCastleLongAllowed() && squares[startSquare - 1] == Pieces.NONE && squares[startSquare - 2] == Pieces.NONE &&
@@ -162,7 +162,7 @@ public class PieceMovementHelper {
         int direction = color == Pieces.WHITE ? 8 : -8;
         int doubleMoveStart = color == Pieces.WHITE ? 1 : 6;
         int promotionMoveStart = color == Pieces.WHITE ? 6 : 1;
-        int enPassantMoveStart = color == Pieces.WHITE ? 3 : 4;
+        int enPassantMoveStart = color == Pieces.WHITE ? 4 : 3;
 
         int startRank = startSquare / 8;
         int startFile = startSquare % 8;

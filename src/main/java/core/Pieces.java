@@ -52,22 +52,23 @@ public class Pieces {
     }
 
     public static boolean isPieceOfColor(int piece, int color) {
-        return (piece & color) == 0;
+        return (piece & color) != 0;
     }
 
     public static List<Move> generatePseudoLegalMoves(int pos, int color) {
-        switch (squares[pos]) {
+        return switch (squares[pos] & 7) {
             case ROOK -> PieceMovementHelper.getStraightMoves(pos, color);
             case QUEEN -> {
                 List<Move> moves = PieceMovementHelper.getStraightMoves(pos, color);
                 moves.addAll(PieceMovementHelper.getDiagonalMoves(pos, color));
+                yield moves;
             }
             case KNIGHT -> PieceMovementHelper.getKnightMoves(pos, color);
             case BISHOP -> PieceMovementHelper.getDiagonalMoves(pos, color);
             case PAWN -> PieceMovementHelper.getPawnMoves(pos, color);
             case KING -> PieceMovementHelper.getKingMoves(pos, color);
-        }
-        return new ArrayList<>();
+            default -> new ArrayList<>();
+        };
     }
 
 }
