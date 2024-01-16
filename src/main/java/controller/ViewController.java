@@ -1,5 +1,6 @@
 package controller;
 
+import core.evaluation.Evaluator;
 import core.modes.GameWithView;
 import core.move.Move;
 import frontend.BoardDisplay;
@@ -20,6 +21,8 @@ public class ViewController extends MouseAdapter {
     private int startRow = 0;
     private int startCol = 0;
 
+    private JLabel evalLabel;
+
     public ViewController(boolean humanOpponent) {
         this.humanOpponent = humanOpponent;
         game = new GameWithView(null, humanOpponent);
@@ -32,6 +35,15 @@ public class ViewController extends MouseAdapter {
         // add board to background container
         JFrame frame = FrameInitializer.initFrame();
         frame.add(boardDisplay);
+
+        int evaluation = Evaluator.evaluate(game.getBoard(), game.getActivePlayer().isWhite());
+
+        evalLabel = new JLabel("Eval: " + evaluation);
+
+        JPanel panel = new JPanel();
+        panel.add(evalLabel);
+        frame.add(panel);
+
         frame.setVisible(true);
     }
 
@@ -82,6 +94,7 @@ public class ViewController extends MouseAdapter {
             if (!game.canPlayerMove() || game.isInsufficientMaterial()) {
                 showGameEndDialog();
             }
+            evalLabel.setText("Eval: " + Evaluator.evaluate(game.getBoard(), game.getActivePlayer().isWhite()));
         }
     }
 
