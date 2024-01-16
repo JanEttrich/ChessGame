@@ -1,41 +1,33 @@
 package util;
 
 import core.Board;
-import org.junit.jupiter.api.BeforeEach;
+import core.Pieces;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static core.Board.squares;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FenStringReaderTest {
-    private Board board;
-
-    @BeforeEach
-    void setUp() {
-        board = new Board();
-    }
-
     @Test
     void testReadRandomFen() {
+        Board.resetBoard();
         String fen = "b1n3q1/p7/R5p1/p7/5K2/P1Nk4/1p3pPP/B7";
-        FenStringReader.read(fen, board);
+        FenStringReader.read(fen);
 
-        assertTrue(board.getSquares()[0][0].isOccupied());
-        assertFalse(board.getPieceFromSquare(0, 0).isWhite());
-        assertEquals("b", board.getPieceFromSquare(0, 0).getDisplay());
+        assertTrue(squares[56] != Pieces.NONE);
+        assertEquals(Pieces.BISHOP | Pieces.BLACK, squares[56]);
 
-        assertTrue(board.getSquares()[0][2].isOccupied());
-        assertFalse(board.getPieceFromSquare(0, 2).isWhite());
-        assertEquals("n", board.getPieceFromSquare(0, 2).getDisplay());
+        assertTrue(squares[58] != Pieces.NONE);
+        assertEquals(Pieces.KNIGHT | Pieces.BLACK, squares[58]);
 
-        assertTrue(board.getSquares()[0][6].isOccupied());
-        assertFalse(board.getPieceFromSquare(0, 6).isWhite());
-        assertEquals("q", board.getPieceFromSquare(0, 6).getDisplay());
+        assertTrue(squares[62] != Pieces.NONE);
+        assertEquals(Pieces.QUEEN | Pieces.BLACK, squares[62]);
 
-        assertFalse(board.getSquares()[0][7].isOccupied());
+        assertEquals(Pieces.NONE, squares[63]);
 
-        assertTrue(board.getSquares()[2][0].isOccupied());
-        assertTrue(board.getPieceFromSquare(2, 0).isWhite());
-        assertEquals("R", board.getPieceFromSquare(2, 0).getDisplay());
+        assertTrue(squares[40] != Pieces.NONE);
+        assertEquals(Pieces.ROOK | Pieces.WHITE, squares[40]);
     }
 
 

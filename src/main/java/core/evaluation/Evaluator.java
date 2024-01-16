@@ -1,30 +1,33 @@
 package core.evaluation;
 
-import core.Board;
-import core.Square;
+import core.Pieces;
 
 import java.util.Map;
 
-public class Evaluator {
-    private static final Map<String, Integer> pieceValueByType = Map.of("P", 1, "N", 3, "B", 3, "R", 5, "Q", 9, "K", 0);
+import static core.Board.squares;
 
-    public static int evaluate(Board board, boolean whiteToMove) {
-        int whiteScore = calculateMaterialScore(board, true);
-        int blackScore = calculateMaterialScore(board, false);
+public class Evaluator {
+    private Evaluator() {
+    }
+
+    private static final Map<Integer, Integer> pieceValueByType = Map.of(Pieces.PAWN, 1, Pieces.KNIGHT, 3,
+            Pieces.BISHOP, 3, Pieces.ROOK, 5, Pieces.QUEEN, 9, Pieces.KING, 0);
+
+    public static int evaluate(boolean whiteToMove) {
+        int whiteScore = calculateMaterialScore(true);
+        int blackScore = calculateMaterialScore(false);
 
         int evaluation = whiteScore - blackScore;
 
         return whiteToMove ? evaluation : -evaluation;
     }
 
-    protected static int calculateMaterialScore(Board board, boolean white) {
+    protected static int calculateMaterialScore(boolean white) {
         int sum = 0;
-        Square[][] squares = board.getSquares();
-        for (Square[] square : squares) {
-            for (int j = 0; j < squares[0].length; j++) {
-                if (square[j].isOccupied() && square[j].getPiece().isWhite() == white) {
-                    sum += pieceValueByType.get(square[j].getPiece().getDisplay().toUpperCase());
-                }
+        int color = white ? Pieces.WHITE : Pieces.BLACK;
+        for (int i = 0; i < 64; i++) {
+            if (squares[i] != Pieces.NONE && Pieces.isPieceOfColor(squares[i], color)) {
+                sum += pieceValueByType.get(squares[i] & 7);
             }
         }
         return sum;

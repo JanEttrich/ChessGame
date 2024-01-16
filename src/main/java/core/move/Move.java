@@ -1,74 +1,73 @@
 package core.move;
 
-import core.Piece;
-import core.Square;
+import core.Board;
+import core.Pieces;
 import lombok.Data;
 
 @Data
 public class Move {
-    private Square startSquare;
-    private Square endSquare;
-    private Piece piece;
+    private int startSquare;
+    private int endSquare;
+    private int piece;
 
     private Boolean promotion;
-    private Piece promotionPiece;
+    private int promotionPiece;
 
     private Boolean castleShort;
     private Boolean castleLong;
 
     private Boolean enPassant;
-    private Square enPassantSquare;
+    private int enPassantSquare;
 
     private Boolean standardCapture;
-    private Piece capturedPiece;
+    private int capturedPiece;
 
-    public Move(Square startSquare, Square endSquare) {
+    public Move(int startSquare, int endSquare) {
         this.startSquare = startSquare;
         this.endSquare = endSquare;
-        this.piece = startSquare.getPiece();
-        if (endSquare.isOccupied()) {
+        this.piece = Board.squares[startSquare];
+        if (Board.squares[endSquare] != Pieces.NONE) {
             standardCapture = true;
-            capturedPiece = endSquare.getPiece();
+            capturedPiece = Board.squares[endSquare];
         }
     }
 
-    public Move(Square startSquare, Square endSquare, Boolean promotion, Piece promotionPiece) {
+    public Move(int startSquare, int endSquare, Boolean promotion, int promotionPiece) {
         this.startSquare = startSquare;
         this.endSquare = endSquare;
-        this.piece = startSquare.getPiece();
+        this.piece = Board.squares[startSquare];
         this.promotion = promotion;
         this.promotionPiece = promotionPiece;
-        if (endSquare.isOccupied()) {
+        if (Board.squares[endSquare] != Pieces.NONE) {
             standardCapture = true;
-            capturedPiece = endSquare.getPiece();
+            capturedPiece = Board.squares[endSquare];
         }
     }
 
-    public Move(Square startSquare, Square endSquare, Boolean enPassant, Square enPassantSquare) {
+    public Move(int startSquare, int endSquare, int enPassantSquare, Boolean enPassant) {
         this.startSquare = startSquare;
         this.endSquare = endSquare;
-        this.piece = startSquare.getPiece();
+        this.piece = Board.squares[startSquare];
         this.enPassant = enPassant;
         this.enPassantSquare = enPassantSquare;
     }
 
-    public Move(Square startSquare, Square endSquare, Boolean castleShort, Boolean castleLong) {
+    public Move(int startSquare, int endSquare, Boolean castleShort, Boolean castleLong) {
         this.startSquare = startSquare;
         this.endSquare = endSquare;
-        this.piece = startSquare.getPiece();
+        this.piece = Board.squares[startSquare];
         this.castleShort = castleShort;
         this.castleLong = castleLong;
     }
 
     @Override
     public String toString() {
-        String move = "[" + piece.getDisplay() + startSquare.toChessSquare() + "-" +
-                endSquare.toChessSquare();
+        String move = "[" + Pieces.getSymbolForPiece(piece) + Board.intToChessSquare(startSquare) + "-" +
+                Board.intToChessSquare(endSquare);
         if (Boolean.TRUE.equals(promotion)) {
-            move += "=" + promotionPiece.getDisplay().toUpperCase();
+            move += "=" + Pieces.getSymbolForPiece(promotionPiece);
         }
         move += "]";
-
         return move;
     }
 }

@@ -1,8 +1,6 @@
 package frontend;
 
-import core.Board;
-import core.Piece;
-import core.Square;
+import core.Pieces;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,20 +12,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static core.Board.squares;
+
 public class BoardDisplay extends JPanel {
     public static final int SQUARE_SIZE = 85;
     private final int rows;
     private final int cols;
-    @Setter
-    private Board board;
     private final PieceDisplay pieceDisplay;
 
     // fields changing on mouse actions
     @Getter
     @Setter
-    private Piece selectedPiece;
+    private Integer selectedSquare;
     @Getter
-    private final List<Square> availableSquares = new ArrayList<>();
+    private final List<Integer> availableSquares = new ArrayList<>();
     @Setter
     private int selectedXPos;
     @Setter
@@ -36,11 +34,10 @@ public class BoardDisplay extends JPanel {
     // marker for reachable square
     private final Image squareMarker;
 
-    public BoardDisplay(Board board) {
-        this.board = board;
+    public BoardDisplay() {
         this.pieceDisplay = new PieceDisplay();
-        this.rows = board.getSquares().length;
-        this.cols = board.getSquares()[0].length;
+        this.rows = 8;
+        this.cols = 8;
 
         setPreferredSize(new Dimension(cols * SQUARE_SIZE, rows * SQUARE_SIZE));
 
@@ -58,10 +55,10 @@ public class BoardDisplay extends JPanel {
 
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
-                Square square = board.getSquares()[row][col];
+                int piece = squares[row * 8 + col];
 
                 // highlight square with selected piece or if it is reachable with capture
-                if (square.isOccupied() && selectedPiece != null && (square.getPiece() == selectedPiece || availableSquares.contains(square))) {
+                if (piece != Pieces.NONE && selectedSquare != null && (piece == squares[selectedSquare] || availableSquares.contains(selectedSquare))) {
                     g2d.setColor(new Color(100, 111, 64));
                 } else {
                     g2d.setColor((row + col) % 2 == 0 ? new Color(227, 197, 181) : new Color(157, 105, 53));
@@ -71,18 +68,18 @@ public class BoardDisplay extends JPanel {
 
 
                 // draw circle for reachable square
-                if (availableSquares.contains(square)) {
+                if (availableSquares.contains(selectedSquare)) {
                     g2d.drawImage(squareMarker, col * SQUARE_SIZE + SQUARE_SIZE / 3, row * SQUARE_SIZE + SQUARE_SIZE / 3, null);
                 }
 
                 // draw piece
-                if (square.isOccupied() && square.getPiece() != selectedPiece) {
-                    pieceDisplay.paint(g2d, square.getPiece(), col * SQUARE_SIZE, row * SQUARE_SIZE);
+                if (piece != Pieces.NONE && selectedSquare != null && row * 8 + col != selectedSquare) {
+                    pieceDisplay.paint(g2d, piece, col * SQUARE_SIZE, row * SQUARE_SIZE);
                 }
 
                 // draw selected piece
-                if (selectedPiece != null) {
-                    pieceDisplay.paint(g2d, selectedPiece, selectedXPos, selectedYPos);
+                if (selectedSquare != null && squares[selectedSquare] != Pieces.NONE) {
+                    pieceDisplay.paint(g2d, squares[selectedSquare], selectedXPos, selectedYPos);
                 }
             }
         }

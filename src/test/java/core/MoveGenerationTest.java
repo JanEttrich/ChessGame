@@ -66,14 +66,14 @@ class MoveGenerationTest {
         Player activePlayer = game.getActivePlayer();
 
         for (Move move : moves) {
-            MoveMaker.makeMove(move, activePlayer.isWhite(), game.getBoard());
+            MoveMaker.makeMove(move);
             boolean updated = game.updateCastlingRights(move);
             game.setActivePlayer(game.getActivePlayer() == GameState.playerWhite ? GameState.playerBlack :
                     GameState.playerWhite);
 
             numPositions += positionCounter(depth - 1);
 
-            MoveMaker.unmakeMove(move, activePlayer.isWhite(), game.getBoard());
+            MoveMaker.unmakeMove(move);
             game.setActivePlayer(game.getActivePlayer() == GameState.playerWhite ? GameState.playerBlack :
                     GameState.playerWhite);
             if (updated) {

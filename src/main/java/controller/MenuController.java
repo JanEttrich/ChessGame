@@ -1,7 +1,5 @@
 package controller;
 
-import core.modes.GameInTerminal;
-
 import javax.swing.*;
 
 import static java.lang.System.exit;
@@ -19,22 +17,9 @@ public class MenuController {
             exit(0);
         }
         boolean humanOpponent = gameModeOption == 1;
+        new ViewController(humanOpponent);
 
-        int inputOption = JOptionPane.showOptionDialog(null, "Wähle deine Eingabeart aus", "Eingabe",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.INFORMATION_MESSAGE, null,
-                new String[]{"Board", "Terminal"}, null);
-        if (inputOption == 0) {
-            frame.setVisible(false);
-            new ViewController(humanOpponent);
 
-        } else if (inputOption == 1) {
-            frame.setVisible(false);
-            new GameInTerminal(null, humanOpponent).startGameOnTerminal();
-
-        } else {
-            exit(0);
-        }
     }
 
 }

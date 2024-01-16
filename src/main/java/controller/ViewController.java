@@ -1,5 +1,7 @@
 package controller;
 
+import core.Board;
+import core.Pieces;
 import core.evaluation.Evaluator;
 import core.modes.GameWithView;
 import core.move.Move;
@@ -10,6 +12,7 @@ import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static core.Board.squares;
 import static java.lang.System.exit;
 
 public class ViewController extends MouseAdapter {
@@ -26,7 +29,7 @@ public class ViewController extends MouseAdapter {
     public ViewController(boolean humanOpponent) {
         this.humanOpponent = humanOpponent;
         game = new GameWithView(null, humanOpponent);
-        boardDisplay = new BoardDisplay(game.getBoard());
+        boardDisplay = new BoardDisplay();
 
         // register controller as observer
         boardDisplay.addMouseListener(this);
@@ -36,7 +39,7 @@ public class ViewController extends MouseAdapter {
         JFrame frame = FrameInitializer.initFrame();
         frame.add(boardDisplay);
 
-        int evaluation = Evaluator.evaluate(game.getBoard(), game.getActivePlayer().isWhite());
+        int evaluation = Evaluator.evaluate(game.getActivePlayer().isWhite());
 
         evalLabel = new JLabel("Eval: " + evaluation);
 
@@ -51,10 +54,10 @@ public class ViewController extends MouseAdapter {
     public void mousePressed(MouseEvent e) {
         startRow = e.getY() / BoardDisplay.SQUARE_SIZE;
         startCol = e.getX() / BoardDisplay.SQUARE_SIZE;
-        boardDisplay.setSelectedPiece(game.getBoard().getPieceFromSquare(startRow, startCol));
-        if (boardDisplay.getSelectedPiece() != null) {
-            var legalMovesForPiece = game.filterMoves(boardDisplay.getSelectedPiece()
-                    .getPseudoLegalMovesForPiece(game.getBoard().getSquares(), game.getBoard().getSquares()[startRow][startCol]));
+        boardDisplay.setSelectedSquare(startRow * 8 + startCol);
+        if (squares[boardDisplay.getSelectedSquare()] != Pieces.NONE) {
+            int color = game.getActivePlayer().isWhite() ? Pieces.WHITE : Pieces.BLACK;
+            var legalMovesForPiece = game.filterMoves(Pieces.generatePseudoLegalMoves(boardDisplay.getSelectedSquare(), color));
             var availableSquares = legalMovesForPiece.stream().map(Move::getEndSquare).toList();
             boardDisplay.getAvailableSquares().addAll(availableSquares);
         }
@@ -62,7 +65,7 @@ public class ViewController extends MouseAdapter {
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if (boardDisplay.getSelectedPiece() != null) {
+        if (boardDisplay.getSelectedSquare() != null && squares[boardDisplay.getSelectedSquare()] != Pieces.NONE) {
             // fix offset of selected piece to mouse
             boardDisplay.setSelectedXPos(e.getX() - BoardDisplay.SQUARE_SIZE / 2);
             boardDisplay.setSelectedYPos(e.getY() - BoardDisplay.SQUARE_SIZE / 2);
@@ -77,7 +80,7 @@ public class ViewController extends MouseAdapter {
         boolean moved = game.handleMove(new MoveResource(startRow, startCol, endRow, endCol));
 
         boardDisplay.repaint();
-        boardDisplay.setSelectedPiece(null);
+        boardDisplay.setSelectedSquare(null);
         boardDisplay.getAvailableSquares().clear();
 
         if (!moved) {
@@ -94,7 +97,7 @@ public class ViewController extends MouseAdapter {
             if (!game.canPlayerMove() || game.isInsufficientMaterial()) {
                 showGameEndDialog();
             }
-            evalLabel.setText("Eval: " + Evaluator.evaluate(game.getBoard(), game.getActivePlayer().isWhite()));
+            evalLabel.setText("Eval: " + Evaluator.evaluate(game.getActivePlayer().isWhite()));
         }
     }
 
@@ -125,7 +128,7 @@ public class ViewController extends MouseAdapter {
 
     public void resetGame() {
         game = new GameWithView(null, humanOpponent);
-        boardDisplay.setBoard(game.getBoard());
+        Board.resetBoard();
         boardDisplay.repaint();
     }
 }

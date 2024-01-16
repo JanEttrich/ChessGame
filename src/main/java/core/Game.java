@@ -3,8 +3,6 @@ package core;
 import core.move.Move;
 import core.move.MoveMaker;
 import core.move.MoveTracker;
-import core.pieces.King;
-import core.pieces.Rook;
 import lombok.Getter;
 import lombok.Setter;
 import util.FenStringReader;
@@ -13,20 +11,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static core.Board.squares;
+
 public class Game {
 
     private static final String START_POS_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-    @Getter
-    protected Board board;
     protected final Player playerWhite;
     protected final Player playerBlack;
-    private final Random random = new Random();
     @Getter
     @Setter
     protected Player activePlayer;
+    private final Random random = new Random();
 
     public Game(String posFen, boolean humanOpponent) {
-        this.board = new Board();
+        Board.resetBoard();
         this.playerWhite = new Player(true, true);
         this.playerBlack = new Player(false, humanOpponent);
         this.activePlayer = playerWhite;
@@ -43,11 +41,11 @@ public class Game {
     // TODO: Draw by 50 move rule
 
     public void initStartingPosition() {
-        FenStringReader.read(START_POS_FEN, board);
+        FenStringReader.read(START_POS_FEN);
     }
 
     public void initPositionFromFen(String fen) {
-        FenStringReader.read(fen, board);
+        FenStringReader.read(fen);
     }
 
     public boolean canPlayerMove() {
@@ -62,16 +60,16 @@ public class Game {
     public boolean checkInsufficientMaterialForPlayer(boolean white) {
         int knightCount = 0;
         int bishopCount = 0;
-        var piecePositions = board.getAllPiecePositionsOfPlayer(white);
+        var piecePositions = Board.getAllPiecePositionsOfPlayer(white);
         if (piecePositions.size() > 2) {
             return false;
         }
-        for (Square square : piecePositions) {
-            if (square.getPiece().getDisplay().equalsIgnoreCase("N")) {
+        for (Integer square : piecePositions) {
+            if ((squares[square] & 7) == Pieces.KNIGHT) {
                 knightCount += 1;
-            } else if (square.getPiece().getDisplay().equalsIgnoreCase("B")) {
+            } else if ((squares[square] & 7) == Pieces.BISHOP) {
                 bishopCount += 1;
-            } else if (!square.getPiece().getDisplay().equalsIgnoreCase("K")) {
+            } else if ((squares[square] & 7) != Pieces.KING) {
                 return false;
             }
         }
@@ -89,7 +87,7 @@ public class Game {
         int randomIndex = random.nextInt(legalMoves.size());
 
         Move randomMove = legalMoves.get(randomIndex);
-        MoveMaker.makeMove(randomMove, activePlayer.isWhite(), board);
+        MoveMaker.makeMove(randomMove);
         updateCastlingRights(randomMove);
         activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
         return randomMove;
@@ -103,11 +101,11 @@ public class Game {
                     threatenedOrCastlesThroughCheck(move)) {
                 continue;
             }
-            MoveMaker.makeMove(move, activePlayer.isWhite(), board);
+            MoveMaker.makeMove(move);
             if (!canKingCanBeCaptured()) {
                 legalMoves.add(move);
             }
-            MoveMaker.unmakeMove(move, activePlayer.isWhite(), board);
+            MoveMaker.unmakeMove(move);
         }
         return legalMoves;
     }
@@ -116,7 +114,7 @@ public class Game {
         // get all possible moves of opponent
         List<Move> pseudoLegalMoves = generatePseudoLegalMoves(!activePlayer.isWhite());
         for (Move move : pseudoLegalMoves) {
-            if (move.getEndSquare().isOccupied() && move.getEndSquare().getPiece().getDisplay().equalsIgnoreCase("K")) {
+            if (squares[move.getEndSquare()] != Pieces.NONE && (squares[move.getEndSquare()] & 7) == Pieces.KING) {
                 // if king can be captured directly, last move was illegal, regardless of if the capturing move is illegal
                 return true;
             }
@@ -126,11 +124,10 @@ public class Game {
 
     private List<Move> generatePseudoLegalMoves(boolean white) {
         // get pseudo-legal moves
-        List<Square> positions = board.getAllPiecePositionsOfPlayer(white);
+        List<Integer> positions = Board.getAllPiecePositionsOfPlayer(white);
         List<Move> pseudoLegalMoves = new ArrayList<>();
-        for (Square sourceSquare : positions) {
-            pseudoLegalMoves.addAll(sourceSquare.getPiece().getPseudoLegalMovesForPiece(board.getSquares(),
-                    sourceSquare));
+        for (Integer sourceSquare : positions) {
+            pseudoLegalMoves.addAll(Pieces.generatePseudoLegalMoves(sourceSquare, white ? Pieces.WHITE : Pieces.BLACK));
         }
         return pseudoLegalMoves;
     }
@@ -144,33 +141,31 @@ public class Game {
         int direction = Boolean.TRUE.equals(move.getCastleShort()) ? 1 : -1;
         // check if horizontal squares are threatened by the opponents pieces
         Move moveToAdjacentSquare = new Move(move.getStartSquare(),
-                board.getSquares()[move.getStartSquare().getRank()][move.getStartSquare().getFile() + direction]);
+                move.getStartSquare() + direction);
 
-        MoveMaker.makeMove(moveToAdjacentSquare, activePlayer.isWhite(), board);
+        MoveMaker.makeMove(moveToAdjacentSquare);
         if (canKingCanBeCaptured()) {
-            MoveMaker.unmakeMove(moveToAdjacentSquare, activePlayer.isWhite(), board);
+            MoveMaker.unmakeMove(moveToAdjacentSquare);
             return true;
         }
-        MoveMaker.unmakeMove(moveToAdjacentSquare, activePlayer.isWhite(), board);
+        MoveMaker.unmakeMove(moveToAdjacentSquare);
         return false;
     }
 
     public boolean updateCastlingRights(Move move) {
-        Piece piece = move.getEndSquare().getPiece();
-        Square sourceSquare = move.getStartSquare();
+        int piece = move.getPiece() & 7;
+        int sourceFile = move.getStartSquare() % 8;
 
         // handle rook/king move for castling rights
-        if (piece instanceof King && activePlayer.canCastleOnAtLeastOneSide()) {
+        if (piece == Pieces.KING && activePlayer.canCastleOnAtLeastOneSide()) {
             activePlayer.disallowCastle();
             return true;
-        } else if (piece instanceof Rook rook) {
-            if (sourceSquare.getFile() == 0 && activePlayer.isCastleLongAllowed() && !rook.isMoved()) {
+        } else if (piece == Pieces.ROOK) {
+            if (sourceFile % 8 == 0 && activePlayer.isCastleLongAllowed()) {
                 activePlayer.setCastleLongAllowed(false);
-                rook.setMoved(true);
                 return true;
-            } else if (sourceSquare.getFile() == 7 && activePlayer.isCastleShortAllowed() && !rook.isMoved()) {
+            } else if (sourceFile % 8 == 7 && activePlayer.isCastleShortAllowed()) {
                 activePlayer.setCastleShortAllowed(false);
-                rook.setMoved(true);
                 return true;
             }
         }
@@ -178,19 +173,17 @@ public class Game {
     }
 
     public void unmakeCastlingRightUpdate(Move move) {
-        Piece piece = move.getPiece();
-        Square sourceSquare = move.getStartSquare();
+        int piece = move.getPiece() & 7;
+        int sourceFile = move.getStartSquare() % 8;
 
         // handle rook/king move for castling rights
-        if (piece instanceof King) {
+        if (piece == Pieces.KING) {
             activePlayer.reAllowedCastle();
-        } else if (piece instanceof Rook rook) {
-            if (sourceSquare.getFile() == 0) {
+        } else if (piece == Pieces.ROOK) {
+            if (sourceFile == 0) {
                 activePlayer.setCastleLongAllowed(true);
-                rook.setMoved(false);
-            } else if (sourceSquare.getFile() == 7) {
+            } else if (sourceFile == 7) {
                 activePlayer.setCastleShortAllowed(true);
-                rook.setMoved(false);
             }
         }
     }

@@ -1,6 +1,6 @@
 package frontend;
 
-import core.Piece;
+import core.Pieces;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -13,7 +13,7 @@ import java.util.Map;
 public class PieceDisplay {
     private final BufferedImage pieceImages;
     private final int singlePieceSize;
-    private Map<String, Image> pieceImageMap;
+    private Map<Integer, Image> pieceImageMap;
 
     public PieceDisplay() {
         try {
@@ -25,36 +25,36 @@ public class PieceDisplay {
         initializeMap();
     }
 
-    public void paint(Graphics2D g2d, Piece piece, int x, int y) {
-        Image pieceImage = pieceImageMap.get(piece.getDisplay());
+    public void paint(Graphics2D g2d, int piece, int x, int y) {
+        Image pieceImage = pieceImageMap.get(piece);
         g2d.drawImage(pieceImage, x, y, null);
     }
 
     private void initializeMap() {
         pieceImageMap = new HashMap<>();
-        pieceImageMap.put("K", pieceImages.getSubimage(0, 0, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.KING | Pieces.WHITE, pieceImages.getSubimage(0, 0, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
-        pieceImageMap.put("Q", pieceImages.getSubimage(singlePieceSize, 0, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.QUEEN | Pieces.WHITE, pieceImages.getSubimage(singlePieceSize, 0, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
-        pieceImageMap.put("B", pieceImages.getSubimage(2 * singlePieceSize, 0, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.BISHOP | Pieces.WHITE, pieceImages.getSubimage(2 * singlePieceSize, 0, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
-        pieceImageMap.put("N", pieceImages.getSubimage(3 * singlePieceSize, 0, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.KNIGHT | Pieces.WHITE, pieceImages.getSubimage(3 * singlePieceSize, 0, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
-        pieceImageMap.put("R", pieceImages.getSubimage(4 * singlePieceSize, 0, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.ROOK | Pieces.WHITE, pieceImages.getSubimage(4 * singlePieceSize, 0, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
-        pieceImageMap.put("P", pieceImages.getSubimage(5 * singlePieceSize, 0, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.PAWN | Pieces.WHITE, pieceImages.getSubimage(5 * singlePieceSize, 0, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
-        pieceImageMap.put("k", pieceImages.getSubimage(0, singlePieceSize, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.KING | Pieces.BLACK, pieceImages.getSubimage(0, singlePieceSize, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
-        pieceImageMap.put("q", pieceImages.getSubimage(singlePieceSize, singlePieceSize, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.QUEEN | Pieces.BLACK, pieceImages.getSubimage(singlePieceSize, singlePieceSize, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
-        pieceImageMap.put("b", pieceImages.getSubimage(2 * singlePieceSize, singlePieceSize, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.BISHOP | Pieces.BLACK, pieceImages.getSubimage(2 * singlePieceSize, singlePieceSize, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
-        pieceImageMap.put("n", pieceImages.getSubimage(3 * singlePieceSize, singlePieceSize, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.KNIGHT | Pieces.BLACK, pieceImages.getSubimage(3 * singlePieceSize, singlePieceSize, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
-        pieceImageMap.put("r", pieceImages.getSubimage(4 * singlePieceSize, singlePieceSize, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.ROOK | Pieces.BLACK, pieceImages.getSubimage(4 * singlePieceSize, singlePieceSize, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
-        pieceImageMap.put("p", pieceImages.getSubimage(5 * singlePieceSize, singlePieceSize, singlePieceSize, singlePieceSize)
+        pieceImageMap.put(Pieces.PAWN | Pieces.BLACK, pieceImages.getSubimage(5 * singlePieceSize, singlePieceSize, singlePieceSize, singlePieceSize)
                 .getScaledInstance(BoardDisplay.SQUARE_SIZE, BoardDisplay.SQUARE_SIZE, Image.SCALE_SMOOTH));
     }
 }
