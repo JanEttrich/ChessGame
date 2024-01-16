@@ -127,8 +127,8 @@ public class ViewController extends MouseAdapter {
     }
 
     public void resetGame() {
-        game = new GameWithView(null, humanOpponent);
         Board.resetBoard();
+        game = new GameWithView(null, humanOpponent);
         boardDisplay.repaint();
     }
 }

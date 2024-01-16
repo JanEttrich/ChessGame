@@ -27,8 +27,8 @@ public class GameWithView extends Game {
     }
 
     private boolean doesMoveMatchUiMove(Move move, MoveResource moveResource) {
-        int startSquare = moveResource.getStartRow() * 8 + moveResource.getStartCol();
-        int endSquare = moveResource.getEndRow() * 8 + moveResource.getEndCol();
+        int startSquare = (7 - moveResource.getStartRow()) * 8 + moveResource.getStartCol();
+        int endSquare = (7 - moveResource.getEndRow()) * 8 + moveResource.getEndCol();
         return squares[startSquare] != Pieces.NONE && move.getStartSquare() == startSquare && move.getEndSquare() == endSquare;
     }
 }
