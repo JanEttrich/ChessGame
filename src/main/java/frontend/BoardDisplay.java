@@ -58,19 +58,19 @@ public class BoardDisplay extends JPanel {
                 // collect piece on the top left first, as drawing occurs from top left to bottom right
                 int piece = squares[(7 - row) * 8 + col];
                 // highlight square with selected piece or if it is reachable with capture
-                //if (piece != Pieces.NONE && selectedSquare != null && (piece == squares[selectedSquare] || availableSquares.contains(selectedSquare))) {
-                //} else {
-                g2d.setColor((row + col) % 2 == 0 ? new Color(227, 197, 181) : new Color(157, 105, 53));
-                // }
+                if (piece != Pieces.NONE && selectedSquare != -1 && ((selectedSquare == (7 - row) * 8 + col) || availableSquares.contains((7 - row) * 8 + col))) {
+                    g2d.setColor(new Color(100, 111, 64));
+                } else {
+                    g2d.setColor((row + col) % 2 == 0 ? new Color(227, 197, 181) : new Color(157, 105, 53));
+                }
                 // draw square
                 g2d.fillRect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
 
 
                 // draw circle for reachable square
-                /*
-                if (availableSquares.contains(selectedSquare)) {
+                if (availableSquares.contains((7 - row) * 8 + col)) {
                     g2d.drawImage(squareMarker, col * SQUARE_SIZE + SQUARE_SIZE / 3, row * SQUARE_SIZE + SQUARE_SIZE / 3, null);
-                }*/
+                }
 
                 // draw piece
                 if (piece != Pieces.NONE && (7 - row) * 8 + col != selectedSquare) {
