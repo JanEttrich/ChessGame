@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static core.Board.squares;
+import static core.Board.*;
 
 public class Game {
 
@@ -33,6 +33,8 @@ public class Game {
         } else {
             initPositionFromFen(posFen);
         }
+        piecesPosWhite = Board.getAllPiecePositionsOfPlayer(true);
+        piecePosBlack = Board.getAllPiecePositionsOfPlayer(false);
         GameState.resetGameState(playerWhite, playerBlack);
         MoveTracker.resetMoves();
     }
@@ -124,7 +126,7 @@ public class Game {
 
     private List<Move> generatePseudoLegalMoves(boolean white) {
         // get pseudo-legal moves
-        List<Integer> positions = Board.getAllPiecePositionsOfPlayer(white);
+        List<Integer> positions = white ? piecesPosWhite : piecePosBlack;
         List<Move> pseudoLegalMoves = new ArrayList<>();
         for (Integer sourceSquare : positions) {
             pseudoLegalMoves.addAll(Pieces.generatePseudoLegalMoves(sourceSquare, white ? Pieces.WHITE : Pieces.BLACK));

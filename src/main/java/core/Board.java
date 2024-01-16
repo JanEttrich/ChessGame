@@ -5,6 +5,8 @@ import java.util.List;
 
 public class Board {
     public static int[] squares;
+    public static List<Integer> piecesPosWhite;
+    public static List<Integer> piecePosBlack;
 
     public static final String RANKS = "12345678";
     public static final String FILES = "abcdefgh";
