@@ -1,5 +1,6 @@
 package core;
 
+import core.evaluation.Evaluator;
 import core.move.Move;
 import core.move.MoveMaker;
 import core.move.MoveTracker;
@@ -8,10 +9,12 @@ import lombok.Setter;
 import util.FenStringReader;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
 import static core.Board.*;
+import static core.evaluation.Evaluator.pieceValueByType;
 
 public class Game {
 
@@ -84,15 +87,82 @@ public class Game {
         return filterMoves(pseudoLegalMoves);
     }
 
-    public Move makeRandomMove() {
+    public Move findRandomMove() {
         List<Move> legalMoves = generate();
         int randomIndex = random.nextInt(legalMoves.size());
 
-        Move randomMove = legalMoves.get(randomIndex);
-        MoveMaker.makeMove(randomMove);
-        updateCastlingRights(randomMove);
-        activePlayer = activePlayer == playerWhite ? playerBlack : playerWhite;
-        return randomMove;
+        return legalMoves.get(randomIndex);
+    }
+
+    static Move bestMove;
+
+    public void searchAndMakeMove() {
+        long start = System.currentTimeMillis();
+        search(3, 3, -100, 100);
+        if (bestMove == null) {
+            bestMove = findRandomMove();
+        }
+        System.out.println("Found move " + bestMove.toString() + " in " + (System.currentTimeMillis() - start) + "ms");
+        MoveMaker.makeMove(bestMove);
+        updateCastlingRights(bestMove);
+        setActivePlayer(activePlayer == GameState.playerWhite ? GameState.playerBlack : GameState.playerWhite);
+        bestMove = null;
+    }
+
+    public int search(int depth, int initialDepth, int alpha, int beta) {
+        if (depth == 0) {
+            return Evaluator.evaluate(activePlayer == GameState.playerWhite);
+        }
+        List<Move> moves = generate();
+        if (moves.isEmpty()) {
+            if (canKingCanBeCaptured()) {
+                return -100;
+            }
+            return 0;
+        }
+        moves = orderMoves(moves);
+
+        // order moves
+
+        for (Move move : moves) {
+            MoveMaker.makeMove(move);
+            boolean updated = updateCastlingRights(move);
+            setActivePlayer(activePlayer == GameState.playerWhite ? GameState.playerBlack : GameState.playerWhite);
+
+            int eval = -search(depth - 1, initialDepth, -beta, -alpha);
+            if (eval > beta) {
+                MoveMaker.unmakeMove(move);
+                setActivePlayer(activePlayer == GameState.playerWhite ? GameState.playerBlack : GameState.playerWhite);
+                if (updated) {
+                    unmakeCastlingRightUpdate(move);
+                }
+                return beta;
+            }
+            // alpha
+            if (eval > alpha) {
+                alpha = eval;
+                if (depth == initialDepth) {
+                    bestMove = move;
+                }
+            }
+
+            MoveMaker.unmakeMove(move);
+            setActivePlayer(activePlayer == GameState.playerWhite ? GameState.playerBlack : GameState.playerWhite);
+            if (updated) {
+                unmakeCastlingRightUpdate(move);
+            }
+        }
+        return alpha;
+    }
+
+    private List<Move> orderMoves(List<Move> moves) {
+
+        return moves.stream().sorted(Comparator.comparingInt(move -> {
+            if (Boolean.TRUE.equals(move.getStandardCapture())) {
+                return pieceValueByType.get(move.getCapturedPiece() & 7) - pieceValueByType.get(move.getPiece() & 7);
+            }
+            return 0;
+        })).toList();
     }
 
     public List<Move> filterMoves(List<Move> pseudoLegalMoves) {

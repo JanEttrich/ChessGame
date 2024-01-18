@@ -93,7 +93,7 @@ public class ViewController extends MouseAdapter {
         }
 
         if (!humanOpponent) {
-            game.makeRandomMove();
+            game.searchAndMakeMove();
             if (!game.canPlayerMove() || game.isInsufficientMaterial()) {
                 showGameEndDialog();
             }
