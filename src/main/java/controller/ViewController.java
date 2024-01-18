@@ -1,6 +1,7 @@
 package controller;
 
 import core.Board;
+import core.GameState;
 import core.Pieces;
 import core.evaluation.Evaluator;
 import core.modes.GameWithView;
@@ -94,7 +95,7 @@ public class ViewController extends MouseAdapter {
 
         if (!humanOpponent) {
             game.searchAndMakeMove();
-            if (!game.canPlayerMove() || game.isInsufficientMaterial()) {
+            if (!game.canPlayerMove() || game.isInsufficientMaterial() || GameState.movesWithoutCaptureAndPawnMove == 100) {
                 showGameEndDialog();
             }
             evalLabel.setText("Eval: " + Evaluator.evaluate(game.getActivePlayer().isWhite()));
@@ -110,6 +111,9 @@ public class ViewController extends MouseAdapter {
         } else if (game.isInsufficientMaterial()) {
             title = "Draw";
             message = "Draw by insufficient material";
+        } else if (GameState.movesWithoutCaptureAndPawnMove == 100) {
+            title = "Draw";
+            message = "Draw by 50 move rule";
         } else {
             title = "Stalemate";
             message = "Draw by Stalemate";
@@ -126,7 +130,7 @@ public class ViewController extends MouseAdapter {
         }
     }
 
-    public void resetGame() {
+    private void resetGame() {
         Board.resetBoard();
         game = new GameWithView(null, humanOpponent);
         boardDisplay.repaint();
