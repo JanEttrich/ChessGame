@@ -55,7 +55,7 @@ public class Pieces {
         return (piece & color) != 0;
     }
 
-    public static List<Move> generatePseudoLegalMoves(int pos, int color) {
+    public static List<Move> generatePseudoLegalMoves(int pos, int color, Player activePlayer) {
         return switch (squares[pos] & 7) {
             case ROOK -> PieceMovementHelper.getStraightMoves(pos, color);
             case QUEEN -> {
@@ -66,7 +66,7 @@ public class Pieces {
             case KNIGHT -> PieceMovementHelper.getKnightMoves(pos, color);
             case BISHOP -> PieceMovementHelper.getDiagonalMoves(pos, color);
             case PAWN -> PieceMovementHelper.getPawnMoves(pos, color);
-            case KING -> PieceMovementHelper.getKingMoves(pos, color);
+            case KING -> PieceMovementHelper.getKingMoves(pos, color, activePlayer);
             default -> new ArrayList<>();
         };
     }

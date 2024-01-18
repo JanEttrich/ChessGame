@@ -1,7 +1,5 @@
 package controller;
 
-import core.Board;
-import core.GameState;
 import core.Pieces;
 import core.evaluation.Evaluator;
 import core.modes.GameWithView;
@@ -18,14 +16,14 @@ import static java.lang.System.exit;
 
 public class ViewController extends MouseAdapter {
     private GameWithView game;
-    private final BoardDisplay boardDisplay;
     private final boolean humanOpponent;
+
+    private final BoardDisplay boardDisplay;
+    private final JLabel evalLabel;
 
     // record mouse press
     private int startRow = 0;
     private int startCol = 0;
-
-    private JLabel evalLabel;
 
     public ViewController(boolean humanOpponent) {
         this.humanOpponent = humanOpponent;
@@ -58,7 +56,7 @@ public class ViewController extends MouseAdapter {
         boardDisplay.setSelectedSquare((7 - startRow) * 8 + startCol);
         if (squares[boardDisplay.getSelectedSquare()] != Pieces.NONE) {
             int color = game.getActivePlayer().isWhite() ? Pieces.WHITE : Pieces.BLACK;
-            var legalMovesForPiece = game.filterMoves(Pieces.generatePseudoLegalMoves(boardDisplay.getSelectedSquare(), color));
+            var legalMovesForPiece = game.filterMoves(Pieces.generatePseudoLegalMoves(boardDisplay.getSelectedSquare(), color, game.getActivePlayer()));
             var availableSquares = legalMovesForPiece.stream().map(Move::getEndSquare).toList();
             boardDisplay.getAvailableSquares().addAll(availableSquares);
         }
@@ -95,7 +93,7 @@ public class ViewController extends MouseAdapter {
 
         if (!humanOpponent) {
             game.searchAndMakeMove();
-            if (!game.canPlayerMove() || game.isInsufficientMaterial() || GameState.movesWithoutCaptureAndPawnMove == 100) {
+            if (!game.canPlayerMove() || game.isInsufficientMaterial() || game.getGameState().getMovesWithoutCaptureAndPawnMove() == 100) {
                 showGameEndDialog();
             }
             evalLabel.setText("Eval: " + Evaluator.evaluate(game.getActivePlayer().isWhite()));
@@ -111,7 +109,7 @@ public class ViewController extends MouseAdapter {
         } else if (game.isInsufficientMaterial()) {
             title = "Draw";
             message = "Draw by insufficient material";
-        } else if (GameState.movesWithoutCaptureAndPawnMove == 100) {
+        } else if (game.getGameState().getMovesWithoutCaptureAndPawnMove() == 100) {
             title = "Draw";
             message = "Draw by 50 move rule";
         } else {
@@ -131,8 +129,8 @@ public class ViewController extends MouseAdapter {
     }
 
     private void resetGame() {
-        Board.resetBoard();
         game = new GameWithView(null, humanOpponent);
         boardDisplay.repaint();
+        evalLabel.setText("Eval: " + Evaluator.evaluate(game.getActivePlayer().isWhite()));
     }
 }

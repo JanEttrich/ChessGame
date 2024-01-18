@@ -1,7 +1,6 @@
 package core;
 
 import core.move.Move;
-import core.move.MoveMaker;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -60,24 +59,13 @@ class MoveGenerationTest {
         if (depth == 0) {
             return 1;
         }
-
         List<Move> moves = game.generate();
         int numPositions = 0;
 
         for (Move move : moves) {
-            MoveMaker.makeMove(move);
-            boolean updated = game.updateCastlingRights(move);
-            game.setActivePlayer(game.getActivePlayer() == GameState.playerWhite ? GameState.playerBlack :
-                    GameState.playerWhite);
-
+            boolean updated = game.makeMoveAndUpdate(move);
             numPositions += positionCounter(depth - 1);
-
-            MoveMaker.unmakeMove(move);
-            game.setActivePlayer(game.getActivePlayer() == GameState.playerWhite ? GameState.playerBlack :
-                    GameState.playerWhite);
-            if (updated) {
-                game.unmakeCastlingRightUpdate(move);
-            }
+            game.unmakeMoveAndUpdate(move, updated);
         }
         return numPositions;
     }

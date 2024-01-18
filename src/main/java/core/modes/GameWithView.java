@@ -1,7 +1,6 @@
 package core.modes;
 
 import core.Game;
-import core.GameState;
 import core.Pieces;
 import core.move.Move;
 import frontend.MoveResource;
@@ -18,7 +17,7 @@ public class GameWithView extends Game {
         for (Move move : legalMoves) {
             if (doesMoveMatchUiMove(move, moveResource)) {
                 makeMoveAndUpdate(move);
-                GameState.update50MoveRule(move);
+                getGameState().update50MoveRule(move);
                 return true;
             }
         }

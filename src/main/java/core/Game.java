@@ -4,46 +4,35 @@ import core.evaluation.Evaluator;
 import core.move.Move;
 import core.move.MoveMaker;
 import core.move.MoveTracker;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import util.FenStringReader;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static core.Board.*;
 import static core.evaluation.Evaluator.pieceValueByType;
 
+@Data
 public class Game {
-
     private static final String START_POS_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-    protected final Player playerWhite;
-    protected final Player playerBlack;
-    @Getter
-    @Setter
-    protected Player activePlayer;
     private final Random random = new Random();
+    private GameState gameState;
+    private Player activePlayer;
     private Move bestMove;
 
     public Game(String posFen, boolean humanOpponent) {
         Board.resetBoard();
-        this.playerWhite = new Player(true, true);
-        this.playerBlack = new Player(false, humanOpponent);
-        this.activePlayer = playerWhite;
-        if (posFen == null) {
-            FenStringReader.read(START_POS_FEN);
-        } else {
-            FenStringReader.read(posFen);
-        }
-        piecesPosWhite = Board.getAllPiecePositionsOfPlayer(true);
-        piecePosBlack = Board.getAllPiecePositionsOfPlayer(false);
-        GameState.resetGameState(playerWhite, playerBlack);
+        FenStringReader.read(Objects.requireNonNullElse(posFen, START_POS_FEN));
+        Board.resetPieceLists();
+
+        gameState = new GameState(humanOpponent);
+        activePlayer = gameState.getPlayerWhite();
         MoveTracker.resetMoves();
     }
 
-    // TODO: Draw by repetition
+    public void switchActivePlayer(boolean white) {
+        activePlayer = white ? gameState.getPlayerBlack() : gameState.getPlayerWhite();
+    }
 
     public boolean canPlayerMove() {
         return !generate().isEmpty();
@@ -94,20 +83,20 @@ public class Game {
         }
         System.out.println("Found move " + bestMove.toString() + " in " + (System.currentTimeMillis() - start) + "ms");
         makeMoveAndUpdate(bestMove);
-        GameState.update50MoveRule(bestMove);
+        gameState.update50MoveRule(bestMove);
         bestMove = null;
     }
 
     public boolean makeMoveAndUpdate(Move move) {
         MoveMaker.makeMove(move);
         boolean updated = updateCastlingRights(move);
-        setActivePlayer(activePlayer == GameState.playerWhite ? GameState.playerBlack : GameState.playerWhite);
+        switchActivePlayer(activePlayer.isWhite());
         return updated;
     }
 
-    private void unmakeMoveAndUpdate(Move move, boolean updated) {
+    public void unmakeMoveAndUpdate(Move move, boolean updated) {
         MoveMaker.unmakeMove(move);
-        setActivePlayer(activePlayer == GameState.playerWhite ? GameState.playerBlack : GameState.playerWhite);
+        switchActivePlayer(activePlayer.isWhite());
         if (updated) {
             unmakeCastlingRightUpdate(move);
         }
@@ -115,7 +104,7 @@ public class Game {
 
     public int search(int depth, int initialDepth, int alpha, int beta) {
         if (depth == 0) {
-            return Evaluator.evaluate(activePlayer == GameState.playerWhite);
+            return Evaluator.evaluate(activePlayer.isWhite());
         }
         List<Move> moves = generate();
         if (moves.isEmpty()) {
@@ -188,7 +177,7 @@ public class Game {
         List<Integer> positions = white ? piecesPosWhite : piecePosBlack;
         List<Move> pseudoLegalMoves = new ArrayList<>();
         for (Integer sourceSquare : positions) {
-            pseudoLegalMoves.addAll(Pieces.generatePseudoLegalMoves(sourceSquare, white ? Pieces.WHITE : Pieces.BLACK));
+            pseudoLegalMoves.addAll(Pieces.generatePseudoLegalMoves(sourceSquare, white ? Pieces.WHITE : Pieces.BLACK, activePlayer));
         }
         return pseudoLegalMoves;
     }

@@ -18,6 +18,11 @@ public class Board {
         }
     }
 
+    public static void resetPieceLists() {
+        piecesPosWhite = Board.getAllPiecePositionsOfPlayer(true);
+        piecePosBlack = Board.getAllPiecePositionsOfPlayer(false);
+    }
+
     public static String intToChessSquare(int index) {
         int rank = index / 8;
         int file = index % 8;

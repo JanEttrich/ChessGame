@@ -1,6 +1,5 @@
 package core.move;
 
-import core.GameState;
 import core.Pieces;
 import core.Player;
 
@@ -113,7 +112,7 @@ public class PieceMovementHelper {
         return moves;
     }
 
-    public static List<Move> getKingMoves(int startSquare, int color) {
+    public static List<Move> getKingMoves(int startSquare, int color, Player activePlayer) {
         List<Move> moves = new ArrayList<>();
 
         // one step in each direction
@@ -142,7 +141,6 @@ public class PieceMovementHelper {
             return moves;
         }
 
-        Player activePlayer = color == Pieces.WHITE ? GameState.playerWhite : GameState.playerBlack;
         if (activePlayer.isCastleShortAllowed() && squares[startSquare + 1] == Pieces.NONE && squares[startSquare + 2] == Pieces.NONE &&
                 squares[startSquare + 3] != Pieces.NONE && squares[startSquare + 3] == (Pieces.ROOK | color)) {
             moves.add(new Move(startSquare, startSquare + 2, true, false));
